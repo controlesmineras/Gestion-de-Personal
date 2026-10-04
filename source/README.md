@@ -35,3 +35,13 @@ Tocar una fila de Personal abre la ficha sencilla con nombre completo, documento
 Capacitaciones contiene Seguimiento del personal y Capacitaciones obligatorias. Administración agrega y edita requisitos para todo el personal. La vigencia en meses sugiere la fecha al registrar la obtención (12 meses = un año; 0 = sin vencimiento); la fecha real del certificado puede ajustarse. Los cambios de nombre conservan los certificados relacionados. Licencias de carro y moto siempre son obligatorias; sus categorías y vencimientos se registran según el documento.
 
 El seguimiento muestra Pendiente, Próxima a vencer (hasta 30 días), Vencida y Vigente; filtra por funcionario, requisito y estado y excluye inactivos. Pendiente incluye ausencia de certificado o de fecha de vigencia. Se conservan títulos anteriores y datos al actualizar desde clientes antiguos. Usuarios laborales consultan su propia ficha y requisitos sin editar ni ver fichas ajenas.
+
+## Carga y descanso
+
+Inicio y fichas muestran horas efectivamente trabajadas en las últimas 24 horas móviles, horas desde el último servicio y alertas de sobrecarga/descanso pendiente. Solo cuentan servicios transcurridos, incluidos los activos; se excluyen permisos, vacaciones y servicios futuros y se unen intervalos superpuestos para evitar duplicar horas.
+
+Después de finalizar un servicio, Disponible/Descanso pasa automáticamente a En descanso hasta cumplir el descanso configurado; luego vuelve a Disponible. Inactivo, No disponible, permisos y vacaciones conservan sus restricciones. Las alertas apoyan la decisión de asignación y no bloquean el registro. “Listos para asignar” excluye personal en descanso, ocupado, ausente o con sobrecarga.
+
+Administración ajusta Carga y descanso para toda la app. Valores iniciales editables: 8 h mínimas de descanso y alerta desde 12 h trabajadas en 24 h. Los cambios se sincronizan entre dispositivos. En Servicios se muestra la carga actual del funcionario seleccionado; al reportar una finalización real se actualiza el cómputo con la fecha/hora registrada.
+
+En Acciones de Personal solo aparece Dar acceso. Editar ficha sigue disponible dentro de la tarjeta.
