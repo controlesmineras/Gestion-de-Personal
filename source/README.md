@@ -59,3 +59,5 @@ El cargo Preparación de alimentos tiene una pestaña administrativa aparte; al 
 Permiso extraordinario por calamidad se puede seleccionar en Disponibilidad, conserva la restricción al asignar servicios y excluye al funcionario de los alimentos mientras tenga ese estado.
 
 Las licencias de conducción de carro y moto no se exigen al cargo Preparación de alimentos: se excluyen del formulario, la ficha y el seguimiento de requisitos para ese cargo. Al cambiar de cargo se conservan los certificados ya registrados. El curso de manipulación de alimentos queda pendiente de una futura decisión; no se crea ni exige todavía.
+
+Las pestañas del personal son SEGURIDAD y COCINA. Permisos y vacaciones se consultan, agregan y editan desde la ficha del funcionario; el formulario fija su identidad. Los filtros de disponibilidad siguen incluyendo De permiso y De vacaciones. Cada registro del historial destaca el administrador y su documento; la cuenta principal aparece como admin.
