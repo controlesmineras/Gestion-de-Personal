@@ -45,3 +45,15 @@ Después de finalizar un servicio, Disponible/Descanso pasa automáticamente a E
 Administración ajusta Carga y descanso para toda la app. Valores iniciales editables: 8 h mínimas de descanso y alerta desde 12 h trabajadas en 24 h. Los cambios se sincronizan entre dispositivos. En Servicios se muestra la carga actual del funcionario seleccionado; al reportar una finalización real se actualiza el cómputo con la fecha/hora registrada.
 
 En Acciones de Personal solo aparece Dar acceso. Editar ficha sigue disponible dentro de la tarjeta.
+
+## Registro disciplinario e historial de cambios
+
+Sanciones y llamados de atención se consultan y registran desde la ficha del funcionario. El formulario fija el funcionario seleccionado; el servidor impide trasladar un registro existente a otra persona. El lápiz de edición queda arriba a la derecha de la ficha.
+
+Historial de cambios muestra los últimos 500 cambios administrativos con fecha/hora de Colombia, funcionario, administrador autenticado y valores antes/después. El servidor toma la identidad de la sesión; la cuenta principal figura como admin. Las escrituras de datos y su auditoría se guardan en un lote atómico; un identificador persistido con cada operación evita repetir un cambio confirmado al reintentar. No se registran contraseñas ni tokens de enlace. El historial comienza desde esta versión; no se reconstruye autoría anterior.
+
+## Preparación de alimentos
+
+El cargo Preparación de alimentos tiene una pestaña administrativa aparte; al agregar desde esa pestaña se selecciona ese cargo. Se da acceso por enlace como a los demás usuarios laborales. Al ingresar, el personal con ese cargo ve cantidades de desayunos, almuerzos y comidas y los nombres completos de quienes los solicitaron por fecha, con actualización automática cada minuto. Conserva sus reportes personales. `/api/kitchen` comprueba la sesión y el cargo vigente; solo expone nombres, empresa y selección de alimentos, sin documentos, observaciones, contratos ni registros disciplinarios. Usuarios laborales de otros cargos no acceden a esa consulta.
+
+Permiso extraordinario por calamidad se puede seleccionar en Disponibilidad, conserva la restricción al asignar servicios y excluye al funcionario de los alimentos mientras tenga ese estado.

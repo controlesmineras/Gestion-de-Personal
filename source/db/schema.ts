@@ -12,3 +12,5 @@ export const adminCredentials=sqliteTable('admin_credentials',{username:text('us
 export const trainingRequirements=sqliteTable('training_requirements',{id:text('id').primaryKey(),name:text('name').notNull().unique(),validityMonths:integer('validity_months').notNull().default(12),updatedAt:text('updated_at').notNull()});
 
 export const workSettings=sqliteTable('work_settings',{id:text('id').primaryKey(),minRestHours:real('min_rest_hours').notNull().default(8),maxWorkHours24:real('max_work_hours_24').notNull().default(12),updatedAt:text('updated_at').notNull()});
+
+export const auditLogs=sqliteTable('audit_logs',{id:text('id').primaryKey(),operationId:text('operation_id').notNull().unique(),occurredAt:text('occurred_at').notNull(),actorId:text('actor_id').notNull(),actorName:text('actor_name').notNull(),actorDocument:text('actor_document').notNull().default(''),entityType:text('entity_type').notNull(),targetId:text('target_id').notNull(),personId:text('person_id').notNull().default(''),action:text('action').notNull(),changes:text('changes').notNull()},t=>[index('idx_audit_time').on(t.occurredAt)]);

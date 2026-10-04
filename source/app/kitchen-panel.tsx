@@ -1,0 +1,9 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {addDays,bogotaDate,dateTime} from '@/lib/personnel';
+const API='https://gestion-de-personal.nelsoncaste86.chatgpt.site/api/kitchen';
+export default function KitchenPanel({token}:{token:string}){
+ const[date,setDate]=useState(addDays(bogotaDate(),1)),[result,setResult]=useState<any>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ useEffect(()=>{let cancelled=false;async function load(){setBusy(true);try{const r=await fetch(API+'?date='+date,{cache:'no-store',signal:AbortSignal.timeout(15000),headers:{Authorization:'Bearer '+token}}),j:any=await r.json();if(!r.ok)throw Error(j.error||'No se pudo cargar la preparación.');if(!cancelled){setResult(j);setError('');}}catch(e){if(!cancelled){setError((e as Error).message);setResult(null);}}finally{if(!cancelled)setBusy(false)}}setResult(null);void load();const timer=setInterval(()=>void load(),60000);return()=>{cancelled=true;clearInterval(timer)}},[date,token]);
+ return <section className="employee-card"><h2>Preparación de alimentos</h2><label>Fecha de preparación<input type="date" required value={date} onChange={e=>setDate(e.target.value||addDays(bogotaDate(),1))}/></label><p>Para mañana, los funcionarios pueden cambiar sus reportes hasta las 11:59 p. m. de hoy. Actualización automática cada minuto.</p>{error&&<p className="notice" role="alert">{error}</p>}{busy&&!result&&<p>Cargando reportes…</p>}{result&&<><small>Actualizado: {dateTime(result.updatedAt)}</small><div className="meal-totals">{[['breakfast','Desayunos'],['lunch','Almuerzos'],['dinner','Comidas']].map(([key,label])=>{const rows=result.rows.filter((p:any)=>!!p[key]);return <article key={key}><span>{label} por preparar</span><b>{rows.length}</b>{rows.length?<ol>{rows.map((p:any)=><li key={p.id}>{p.name}{p.company&&<small className="record-note">{p.company}</small>}</li>)}</ol>:<p>No hay solicitudes.</p>}</article>})}</div></>}</section>;
+}

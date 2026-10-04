@@ -4,15 +4,16 @@ export {bogotaDate,validDate,addDays} from './qualifications';
 export type Person={id:string;document:string;name:string;company?:string;firstName?:string;secondName?:string;firstSurname?:string;secondSurname?:string;role:string;phone:string;status:string;notes:string;titles?:string;strengths?:string;accessRole?:string;invitationRole?:string;qualifications?:Qualification[]|string;contractEnd?:string;contractIndefinite?:boolean|number};
 export type PersonnelEvent={id:string;personId:string;kind:string;start:string;end:string;place:string;notes:string;authorizedBy?:string;extraDays?:number};
 export type Discipline={id:string;personId:string;kind:string;reason:string;start:string;end:string;notes:string};
+export type AuditLog={id:string;occurredAt:string;actorId:string;actorName:string;actorDocument:string;entityType:string;targetId:string;personId:string;action:string;changes:string};
 export type Meal={id:string;personId:string;date:string;breakfast:number;lunch:number;dinner:number};
-export type Data={people:Person[];events:PersonnelEvent[];discipline?:Discipline[];meals?:Meal[];trainingRequirements?:TrainingRequirement[];workSettings?:WorkSettings};
+export type Data={people:Person[];events:PersonnelEvent[];discipline?:Discipline[];meals?:Meal[];trainingRequirements?:TrainingRequirement[];workSettings?:WorkSettings;auditLogs?:AuditLog[]};
 export const companies=['SK','E-SECURITY'];
-export const roles=['Director de seguridad','Jefe de seguridad','Supervisor','Escolta','Operador de seguridad','SST'];
-export const statuses=['Disponible','De permiso','De vacaciones','En descanso','No disponible','Inactivo'];
+export const roles=['Director de seguridad','Jefe de seguridad','Supervisor','Escolta','Operador de seguridad','SST','Preparación de alimentos'];
+export const statuses=['Disponible','De permiso','De vacaciones','En descanso','No disponible','Inactivo','Permiso extraordinario por calamidad'];
 const text=(v:unknown,max=500)=>typeof v==='string'?v.trim().slice(0,max):'';
 export const listItems=(v:unknown):string[]=>Array.isArray(v)?v.map(x=>text(x,150)).filter(Boolean):typeof v==='string'?v.split('\n').map(x=>x.trim()).filter(Boolean):[];
 export function permissionDays(start:string,end:string){return Math.ceil((Date.parse(end)-Date.parse(start))/86400000)}
-export function mealBlocked(person:Person,events:PersonnelEvent[],date:string){if(['Inactivo','De permiso','De vacaciones'].includes(person.status))return true;const start=date+'T05:00:00.000Z',end=addDays(date,1)+'T05:00:00.000Z';return events.some(e=>e.personId===person.id&&['Permiso','Vacaciones'].includes(e.kind)&&e.start<end&&e.end>start)}
+export function mealBlocked(person:Person,events:PersonnelEvent[],date:string){if(['Inactivo','De permiso','De vacaciones','Permiso extraordinario por calamidad'].includes(person.status))return true;const start=date+'T05:00:00.000Z',end=addDays(date,1)+'T05:00:00.000Z';return events.some(e=>e.personId===person.id&&['Permiso','Vacaciones'].includes(e.kind)&&e.start<end&&e.end>start)}
 export function validateRecord(type:unknown,input:any):any{
  if(!input||typeof input!=='object')throw Error('Registro inválido.');const id=text(input.id,80);if(!/^[a-zA-Z0-9-]{8,80}$/.test(id))throw Error('Identificador inválido.');
  if(type==='settings')return validateWorkSettings(input);

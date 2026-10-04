@@ -64,6 +64,13 @@
       "when": 1791148203856,
       "tag": "0008_good_toad_men",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1791150207366,
+      "tag": "0009_fancy_jack_flag",
+      "breakpoints": true
     }
   ]
 }
