@@ -6,11 +6,11 @@ Producto independiente de SK-Web y Plaza Blending, con repositorio, backend y ba
 
 ## Administración
 
-Personal con documento, primer y segundo nombre, primer y segundo apellido, empresa, cargo, teléfono, disponibilidad, títulos y fortalezas individuales. Primer nombre, primer apellido y empresa son obligatorios. Empresa admite solo SK o E-SECURITY; cargo admite solo Director de seguridad, Jefe de seguridad, Supervisor, Escolta y Operador de seguridad.
+Personal con documento, primer y segundo nombre, primer y segundo apellido, empresa, cargo, teléfono, disponibilidad, títulos y fortalezas individuales. Primer nombre, primer apellido y empresa son obligatorios. Empresa admite solo SK o E-SECURITY; cargo admite solo Director de seguridad, Jefe de seguridad, Supervisor, Escolta, Operador de seguridad y SST.
 
 Servicios con inicio/finalización y horas; permisos y vacaciones por fechas inclusivas; sanciones y llamados de atención con motivo y fechas; historial por funcionario. Los permisos superiores a diez días registran los días adicionales y quién los autorizó. Solo los servicios suman horas trabajadas.
 
-El administrador entra con su clave privada. Generar clave en Personal crea una clave individual de colaborador, visible una sola vez. Entrégala únicamente al titular. Regenerarla invalida la anterior y las sesiones existentes. Las claves no se publican ni se guardan en texto plano en el servidor.
+El administrador usa el usuario `admin`. El titular elige su contraseña inicial desde el enlace privado de configuración, válido para crearla una sola vez. La contraseña se guarda con salt y PBKDF2; los accesos usan sesiones firmadas de 24 horas. Generar clave en Personal crea una clave individual de colaborador, visible una sola vez. Entrégala únicamente al titular. Regenerarla invalida la anterior y las sesiones existentes. Las claves no se publican ni se guardan en texto plano en el servidor.
 
 ## Colaboradores y alimentos
 
@@ -26,4 +26,4 @@ Las migraciones agregan campos sin borrar perfiles, títulos, fortalezas ni movi
 
 Código completo en `source/`. Compila la interfaz con `pnpm exec vite build --config vite.github.config.ts`; publica `github-dist/` en la raíz, conservando `source/`. GitHub Pages publica main, raíz. El backend independiente atiende `/api/data` y `/api/self` en `https://gestion-de-personal.nelsoncaste86.chatgpt.site`.
 
-El secreto GP_ACCESS_HASH se configura solo en el backend. La API administrativa exige la clave privada y la API personal comprueba sesiones firmadas de 24 horas y la versión vigente de la clave individual. Los intentos de acceso están limitados. Las pruebas de reglas y API están en `tests/personnel-rules.cjs`; usa `node tests/personnel-rules.cjs`.
+El secreto GP_ACCESS_HASH se configura solo en el backend. La API administrativa exige una sesión válida de admin y la API personal comprueba sesiones firmadas de 24 horas y la versión vigente de la clave individual. Los intentos de acceso están limitados. Las pruebas de reglas y API están en `tests/personnel-rules.cjs`; usa `node tests/personnel-rules.cjs`.

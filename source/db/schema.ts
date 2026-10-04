@@ -5,3 +5,5 @@ export const discipline=sqliteTable('discipline',{id:text('id').primaryKey(),per
 export const meals=sqliteTable('meals',{id:text('id').primaryKey(),personId:text('person_id').notNull().references(()=>people.id),date:text('date').notNull(),breakfast:integer('breakfast').notNull().default(0),lunch:integer('lunch').notNull().default(0),dinner:integer('dinner').notNull().default(0),updatedAt:text('updated_at').notNull()},t=>[uniqueIndex('idx_meal_person_date').on(t.personId,t.date)]);
 export const credentials=sqliteTable('employee_credentials',{personId:text('person_id').primaryKey().references(()=>people.id),codeHash:text('code_hash').notNull(),version:text('version').notNull(),updatedAt:text('updated_at').notNull()});
 export const attempts=sqliteTable('login_attempts',{key:text('key').primaryKey(),count:integer('count').notNull(),resetAt:integer('reset_at').notNull()});
+
+export const adminCredentials=sqliteTable('admin_credentials',{username:text('username').primaryKey(),passwordHash:text('password_hash').notNull(),salt:text('salt').notNull(),version:text('version').notNull(),createdAt:text('created_at').notNull()});
