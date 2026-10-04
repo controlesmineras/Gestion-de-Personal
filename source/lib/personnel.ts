@@ -4,7 +4,7 @@ export type Discipline={id:string;personId:string;kind:string;reason:string;star
 export type Meal={id:string;personId:string;date:string;breakfast:number;lunch:number;dinner:number};
 export type Data={people:Person[];events:PersonnelEvent[];discipline?:Discipline[];meals?:Meal[]};
 export const companies=['SK','E-SECURITY'];
-export const roles=['Director de seguridad','Jefe de seguridad','Supervisor','Escolta','Operador de seguridad'];
+export const roles=['Director de seguridad','Jefe de seguridad','Supervisor','Escolta','Operador de seguridad','SST'];
 export const statuses=['Disponible','De permiso','De vacaciones','Descanso','No disponible','Inactivo'];
 const text=(v:unknown,max=500)=>typeof v==='string'?v.trim().slice(0,max):'';
 export const listItems=(v:unknown):string[]=>Array.isArray(v)?v.map(x=>text(x,150)).filter(Boolean):typeof v==='string'?v.split('\n').map(x=>x.trim()).filter(Boolean):[];
