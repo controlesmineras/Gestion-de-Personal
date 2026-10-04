@@ -71,6 +71,13 @@
       "when": 1791150207366,
       "tag": "0009_fancy_jack_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1791151719180,
+      "tag": "0010_pink_turbo",
+      "breakpoints": true
     }
   ]
 }
