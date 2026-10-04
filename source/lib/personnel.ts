@@ -1,4 +1,4 @@
-export type Person={id:string;document:string;name:string;company?:string;firstName?:string;secondName?:string;firstSurname?:string;secondSurname?:string;role:string;phone:string;status:string;notes:string;titles?:string;strengths?:string};
+export type Person={id:string;document:string;name:string;company?:string;firstName?:string;secondName?:string;firstSurname?:string;secondSurname?:string;role:string;phone:string;status:string;notes:string;titles?:string;strengths?:string;accessRole?:string;invitationRole?:string};
 export type PersonnelEvent={id:string;personId:string;kind:string;start:string;end:string;place:string;notes:string;authorizedBy?:string;extraDays?:number};
 export type Discipline={id:string;personId:string;kind:string;reason:string;start:string;end:string;notes:string};
 export type Meal={id:string;personId:string;date:string;breakfast:number;lunch:number;dinner:number};
