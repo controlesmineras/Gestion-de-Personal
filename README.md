@@ -10,11 +10,11 @@ Personal con documento, primer y segundo nombre, primer y segundo apellido, empr
 
 Servicios con inicio/finalización y horas; permisos y vacaciones por fechas inclusivas; sanciones y llamados de atención con motivo y fechas; historial por funcionario. Los permisos superiores a diez días registran los días adicionales y quién los autorizó. Solo los servicios suman horas trabajadas.
 
-El administrador usa el usuario `admin`. El titular elige su contraseña inicial desde el enlace privado de configuración, válido para crearla una sola vez. La contraseña se guarda con salt y PBKDF2; los accesos usan sesiones firmadas de 24 horas. Generar clave en Personal crea una clave individual de colaborador, visible una sola vez. Entrégala únicamente al titular. Regenerarla invalida la anterior y las sesiones existentes. Las claves no se publican ni se guardan en texto plano en el servidor.
+El administrador usa el usuario `admin`. El titular elige su contraseña inicial desde el enlace privado de configuración, válido para crearla una sola vez. La contraseña se guarda con salt y PBKDF2; los accesos usan sesiones firmadas de 24 horas. Generar enlace en Personal crea un enlace de activación válido 24 horas y de un solo uso. Copiar enlace permite entregarlo al funcionario, quien confirma su documento y elige su contraseña (8 a 128 caracteres). Regenerar reemplaza el enlace anterior. Los accesos previos siguen funcionando hasta que se activa el nuevo enlace; la activación reemplaza la contraseña e invalida las sesiones anteriores. La contraseña no se muestra al administrador y se guarda con salt y PBKDF2. Los enlaces se almacenan solo como hash. Las claves personales anteriores se conservan hasta la activación.
 
 ## Colaboradores y alimentos
 
-Cada colaborador ingresa con su documento y clave personal. Solo consulta sus servicios, permisos y vacaciones y reporta su propia salida de permiso. No accede a los datos de otros colaboradores, sanciones ni administración.
+Cada colaborador ingresa con su documento y contraseña. Solo consulta sus servicios, permisos y vacaciones y reporta su propia salida de permiso. No accede a los datos de otros colaboradores, sanciones ni administración.
 
 Desayuno, almuerzo y comida se reportan para el siguiente día, hasta las 11:59 p. m. del día anterior, hora de Colombia. El servidor valida el día y el cierre; los reportes requieren conexión. Se pueden actualizar hasta cerrar el plazo. Permisos y vacaciones que coincidan con el día bloquean sus alimentos; los pedidos previos dejan de contar si posteriormente se registra la ausencia. Administración muestra totales y funcionarios sin reporte.
 
