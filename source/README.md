@@ -27,3 +27,11 @@ Las migraciones agregan campos sin borrar perfiles, títulos, fortalezas ni movi
 Código completo en `source/`. Compila la interfaz con `pnpm exec vite build --config vite.github.config.ts`; publica `github-dist/` en la raíz, conservando `source/`. GitHub Pages publica main, raíz. El backend independiente atiende `/api/data` y `/api/self` en `https://gestion-de-personal.nelsoncaste86.chatgpt.site`.
 
 El secreto GP_ACCESS_HASH se configura solo en el backend. La API administrativa exige una sesión válida de admin y la API personal comprueba sesiones firmadas de 24 horas y la versión vigente de la clave individual. Los intentos de acceso están limitados. Las pruebas de reglas y API están en `tests/personnel-rules.cjs`; usa `node tests/personnel-rules.cjs`.
+
+## Fichas y capacitaciones
+
+Tocar una fila de Personal abre la ficha sencilla con nombre completo, documento, empresa, cargo, teléfono, disponibilidad, títulos, capacitaciones, fortalezas, observaciones, contrato y licencias. El historial queda desplegable. Contrato permite fecha de vencimiento o sin vencimiento.
+
+Capacitaciones contiene Seguimiento del personal y Capacitaciones obligatorias. Administración agrega y edita requisitos para todo el personal. La vigencia en meses sugiere la fecha al registrar la obtención (12 meses = un año; 0 = sin vencimiento); la fecha real del certificado puede ajustarse. Los cambios de nombre conservan los certificados relacionados. Licencias de carro y moto siempre son obligatorias; sus categorías y vencimientos se registran según el documento.
+
+El seguimiento muestra Pendiente, Próxima a vencer (hasta 30 días), Vencida y Vigente; filtra por funcionario, requisito y estado y excluye inactivos. Pendiente incluye ausencia de certificado o de fecha de vigencia. Se conservan títulos anteriores y datos al actualizar desde clientes antiguos. Usuarios laborales consultan su propia ficha y requisitos sin editar ni ver fichas ajenas.
