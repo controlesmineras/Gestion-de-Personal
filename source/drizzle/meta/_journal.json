@@ -15,6 +15,20 @@
       "when": 1791138406955,
       "tag": "0001_gorgeous_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791140880077,
+      "tag": "0002_cuddly_dracula",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1791141007703,
+      "tag": "0003_gigantic_hellfire_club",
+      "breakpoints": true
     }
   ]
 }
