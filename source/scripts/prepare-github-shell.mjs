@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root=path.resolve(import.meta.dirname,'../..');
+const dist=path.join(root,'source/github-dist');
+const generated=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+const script=generated.match(/<script[^>]*type="module"[^>]*src="[^"]+"[^>]*><\/script>/)?.[0];
+const stylesheet=generated.match(/<link[^>]*rel="stylesheet"[^>]*href="[^"]+"[^>]*>/)?.[0];
+if(!script||!stylesheet)throw Error('Expected one bundled entry script and stylesheet');
+let shell=fs.readFileSync(path.join(root,'index.html'),'utf8');
+if(!/<script[^>]*type="module"[^>]*><\/script>/.test(shell)||!/<link[^>]*rel="stylesheet"[^>]*>/.test(shell))throw Error('Published shell has changed');
+shell=shell.replace(/<script[^>]*type="module"[^>]*><\/script>/,script).replace(/<link[^>]*rel="stylesheet"[^>]*>/,stylesheet);
+fs.writeFileSync(path.join(root,'index.html'),shell);
+fs.cpSync(path.join(dist,'assets'),path.join(root,'assets'),{recursive:true});
+const js=script.match(/src="([^"]+)"/)[1],css=stylesheet.match(/href="([^"]+)"/)[1];
+let sw=fs.readFileSync(path.join(root,'source/public/sw.js'),'utf8');
+sw=sw.replace(/const CACHE='[^']+'/,"const CACHE='gestion-personal-shell-login-selector-"+path.basename(js)+"'");
+sw=sw.replace(/'\.\/assets\/[^']+\.js'/,JSON.stringify(js)).replace(/'\.\/assets\/[^']+\.css'/,JSON.stringify(css));
+// Also handles re-running after a previous build wrote double quotes.
+sw=sw.replace(/"\.\/assets\/[^"]+\.js"/,JSON.stringify(js)).replace(/"\.\/assets\/[^"]+\.css"/,JSON.stringify(css));
+fs.writeFileSync(path.join(root,'sw.js'),sw);
+fs.writeFileSync(path.join(root,'source/public/sw.js'),sw);
+console.log('Prepared published shell with',js,css);

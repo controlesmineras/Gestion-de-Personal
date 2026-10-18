@@ -117,3 +117,13 @@ body {
 
 /* Logo y nombre centrados en los accesos de personal. */
 .access-card>h1{text-align:center}.access-card>img{display:block;margin:0 auto 20px}.access-card:has(>svg:first-child)::before{margin-left:auto;margin-right:auto}
+
+/* Remembered ADMINISTRADOR / SEGURIDAD entry choice. */
+.access-mode-selector{border:0;padding:0;margin:20px 0;min-width:0;text-align:left}
+.access-mode-selector legend{font-weight:700;font-size:14px;margin-bottom:10px}
+.access-mode-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.access-mode-options button{min-height:48px;padding:12px 8px;border:1px solid #b9cad6;border-radius:10px;background:#f3f7fa;color:#18374a;font-size:12px;font-weight:750;cursor:pointer}
+.access-mode-options button[aria-pressed="true"]{background:#12374f;border-color:#12374f;color:white;box-shadow:inset 0 0 0 1px #12374f}
+.access-mode-options button:focus-visible{outline:3px solid #3196c7;outline-offset:3px}
+.access-mode-selector:disabled button{cursor:wait;opacity:.6}
+.access-mode-selector small{display:block;margin-top:10px;font-size:12px;line-height:1.5;color:#536b7b}

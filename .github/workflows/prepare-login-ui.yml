@@ -1,0 +1,64 @@
+name: Prepare personnel login interface
+on:
+  push:
+    branches: ['codex/ingreso-*']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: prepare-login-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: source/package.json
+      - name: Install locked dependencies
+        working-directory: source
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Check access and offline behavior
+        working-directory: source
+        run: |
+          node tests/login-mode.cjs
+          node tests/device-access.cjs
+          node tests/admin-auth.cjs
+          node tests/personnel-rules.cjs
+      - name: Build interface
+        working-directory: source
+        run: pnpm exec vite build --config vite.github.config.ts
+      - name: Update published assets and cache
+        run: node source/scripts/prepare-github-shell.mjs
+      - name: Install browser test runner
+        run: |
+          npm install --prefix "$RUNNER_TEMP/login-ui" playwright@1.51.1 --no-audit --no-fund
+          "$RUNNER_TEMP/login-ui/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check compiled interface on desktop and mobile
+        env:
+          NODE_PATH: ${{ runner.temp }}/login-ui/node_modules
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > "$RUNNER_TEMP/login-http.log" 2>&1 &
+          node source/tests/login-ui.cjs
+      - name: Retain interface screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: login-interface-review
+          path: test-results/login/
+          if-no-files-found: ignore
+      - name: Commit verified assets on preparation branch
+        if: startsWith(github.ref, 'refs/heads/codex/ingreso-')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets sw.js source/public/sw.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Build verified administrator and security entry selector"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
