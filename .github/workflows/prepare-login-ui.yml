@@ -27,6 +27,8 @@ jobs:
         working-directory: source
         run: |
           node tests/absence-return.cjs
+          node tests/incapacity.cjs
+          node tests/workload.cjs
           node tests/login-mode.cjs
           node tests/device-access.cjs
           node tests/admin-auth.cjs
