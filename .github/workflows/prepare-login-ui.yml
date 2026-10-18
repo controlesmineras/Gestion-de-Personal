@@ -1,7 +1,7 @@
-name: Prepare personnel login interface
+name: Prepare personnel interface
 on:
   push:
-    branches: ['codex/ingreso-*']
+    branches: ['codex/ingreso-*', 'codex/regreso-*']
   workflow_dispatch:
 permissions:
   contents: write
@@ -26,6 +26,7 @@ jobs:
       - name: Check access and offline behavior
         working-directory: source
         run: |
+          node tests/absence-return.cjs
           node tests/login-mode.cjs
           node tests/device-access.cjs
           node tests/admin-auth.cjs
@@ -53,12 +54,12 @@ jobs:
           path: test-results/login/
           if-no-files-found: ignore
       - name: Commit verified assets on preparation branch
-        if: startsWith(github.ref, 'refs/heads/codex/ingreso-')
+        if: startsWith(github.ref, 'refs/heads/codex/ingreso-') || startsWith(github.ref, 'refs/heads/codex/regreso-')
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html assets sw.js source/public/sw.js
           if ! git diff --cached --quiet; then
-            git commit -m "Build verified administrator and security entry selector"
+            git commit -m "Build verified personnel interface"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi

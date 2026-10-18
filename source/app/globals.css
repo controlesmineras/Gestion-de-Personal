@@ -127,3 +127,8 @@ body {
 .access-mode-options button:focus-visible{outline:3px solid #3196c7;outline-offset:3px}
 .access-mode-selector:disabled button{cursor:wait;opacity:.6}
 .access-mode-selector small{display:block;margin-top:10px;font-size:12px;line-height:1.5;color:#536b7b}
+
+.absence-return{display:grid;gap:4px;margin-top:8px;line-height:1.45;font-size:13px;color:#244b63}
+.absence-return time{white-space:nowrap}
+.absence-return small{display:block;color:#536b7b;font-size:12px}
+.absence-return .return-finished{color:#8a5b16;font-weight:600}

@@ -81,3 +81,10 @@ La actividad se guarda como un único registro con su lista de asistentes. Los s
 Editar la actividad actualiza todas las asignaciones en un lote atómico, sin permitir editar servicios vinculados por separado. Si aparece un cruce concurrente, no se guarda ninguna asignación parcial. Los cambios quedan en el historial con el administrador real y reintentos con identificador de operación no duplican asignaciones. Se conservan datos anteriores.
 
 Después de Generar actividad y desde cada tarjeta administrativa, Copiar mensaje presenta labor, fechas desde/hasta, horas desde/hasta, encargado, asistentes y funciones específicas. Copiar no envía mensajes. Las operaciones guardadas localmente muestran Pendiente de sincronizar hasta confirmar; la vista del mensaje advierte que debe confirmarse antes de comunicarla.
+
+
+## Regreso previsto de ausencias
+
+La lista de personal muestra debajo de la disponibilidad la fecha y hora de regreso previsto de los permisos y vacaciones vigentes. Los filtros De permiso y De vacaciones permiten consultarlo sin abrir fichas. El formato es DD/MM/AAAA, hh:mm a. m./p. m., siempre en hora de Colombia. El día final de una ausencia se incluye completo: si termina el 22/10/2026, el regreso previsto es el 23/10/2026 a las 12:00 a. m.
+
+La cuenta regresiva se actualiza con el reloj de la app. Ausencias consecutivas enlazadas muestran el regreso al concluir el conjunto. La ficha y el portal personal conservan cada periodo, su fecha y la indicación Periodo finalizado cuando corresponde. Se calcula una previsión, sin registrar una presentación efectiva ni borrar el historial. Si la disponibilidad se indicó manualmente sin un periodo fechado, muestra Regreso previsto: por registrar.
