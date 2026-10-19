@@ -101,6 +101,17 @@ assert.throws(()=>rules.validateRecord('person',{...docPerson,documents:{frontUr
 const invalidUpload=new FormData();invalidUpload.set('personId',person.id);invalidUpload.set('file',new File(['<svg onload=alert(1)>'],'fake.pdf',{type:'application/pdf'}));assert.equal((await documents.POST(new Request('https://backend.test/api/documents',{method:'POST',headers:{Authorization:'Bearer admin-secret'},body:invalidUpload}))).status,400);
 console.log('PASS SK and E-SECURITY dashboard, future vacations and exact boundaries, incapacity/overlaps/meals, document upload auth, file ownership, MIME validation and old-client document preservation');
 
+// Manual incapacity detail survives synchronization, old clients and later status changes.
+const manualIncapacity={...person,status:'Incapacitado',statusDetail:'Fractura del estribo'};
+assert.equal((await call(admin,{type:'person',record:{...manualIncapacity,statusDetail:''}})).status,400);
+assert.equal((await call(admin,{type:'person',record:manualIncapacity})).status,200);
+let detailPerson=(await call(admin,null)).data.people.find(x=>x.id===person.id);assert.equal(detailPerson.statusDetail,'Fractura del estribo');assert.equal(rules.personStatus(detailPerson,[],clock),'Incapacitado');assert.equal(load('lib/workload.ts').workload(detailPerson,[],undefined,clock).canAssign,false);
+const {statusDetail:omittedDetail,...oldIncapacity}=manualIncapacity;assert.equal((await call(admin,{type:'person',record:oldIncapacity})).status,200);assert.equal((await call(admin,null)).data.people.find(x=>x.id===person.id).statusDetail,'Fractura del estribo');
+assert.equal((await call(admin,{type:'person',record:{...manualIncapacity,statusDetail:'Recuperación de fractura'}})).status,200);assert.equal((await call(admin,null)).data.people.find(x=>x.id===person.id).statusDetail,'Recuperación de fractura');
+assert.equal((await call(admin,{type:'person',record:person})).status,200);assert.equal((await call(admin,null)).data.people.find(x=>x.id===person.id).statusDetail,'Recuperación de fractura');
+assert.equal((await call(admin,{type:'person',record:{...person,id:'incapacity-without-detail',document:'new-incapacity-doc',status:'Incapacitado'}})).status,400);
+console.log('PASS manual incapacity detail: required, persisted, updated, excluded from assignment and preserved for older clients');
+
 const down=await call(admin,{type:'invite',personId:'person-admin-123',accessRole:'Laboral'});const downgraded=await call(self,{action:'activate',document:'103',password:'laboral-person-password',invitation:down.data.url.split('#activate=')[1],accessRole:'Administrador'},'');assert.equal(downgraded.status,200);assert.equal(downgraded.data.accessRole,'Laboral');assert.equal((await call(admin,null,newAdmin.data.token)).status,401);assert.equal((await call(admin,null,downgraded.data.token)).status,401);
 await sql.exec("UPDATE people SET status='Inactivo' WHERE id='person-one-123'");assert.equal((await call(admin,null,anotherAdmin.data.token)).status,401);assert.equal((await call(adminAuth,{action:'login',username:'101',password:'second-admin-password'},'')).status,401);
 for(let i=0;i<10;i++)assert.equal((await call(self,{action:'login',document:'102',code:'wrong'},'')).status,401);assert.equal((await call(self,{action:'login',document:'102',code:'wrong'},'')).status,429);
