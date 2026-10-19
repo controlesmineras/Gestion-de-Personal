@@ -88,3 +88,15 @@ Después de Generar actividad y desde cada tarjeta administrativa, Copiar mensaj
 La lista de personal muestra debajo de la disponibilidad la fecha y hora de regreso previsto de los permisos y vacaciones vigentes. Los filtros De permiso y De vacaciones permiten consultarlo sin abrir fichas. El formato es DD/MM/AAAA, hh:mm a. m./p. m., siempre en hora de Colombia. El día final de una ausencia se incluye completo: si termina el 22/10/2026, el regreso previsto es el 23/10/2026 a las 12:00 a. m.
 
 La cuenta regresiva se actualiza con el reloj de la app. Ausencias consecutivas enlazadas muestran el regreso al concluir el conjunto. La ficha y el portal personal conservan cada periodo, su fecha y la indicación Periodo finalizado cuando corresponde. Se calcula una previsión, sin registrar una presentación efectiva ni borrar el historial. Si la disponibilidad se indicó manualmente sin un periodo fechado, muestra Regreso previsto: por registrar.
+
+
+
+## Disponibilidad, novedades y documentos
+
+El dashboard usa el grupo visible (SEGURIDAD o COCINA), incluye SK y E-SECURITY y permite ver los nombres que forman el total. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
+
+La ficha permite programar o registrar Permiso, Vacaciones e Incapacidad, con fechas inclusivas y sin restricción al día actual. La ausencia cambia el estado durante su intervalo y se verifica en los cruces de servicios, actividades y alimentos. El portal personal incluye estas novedades y su cola local.
+
+Número de documento sigue siendo la identificación única. Cédula y licencias tienen enlaces separados para frente y reverso. Documentos del funcionario y cada capacitación aceptan imágenes JPG/PNG/WebP o PDF (10 MB por archivo), un documento inicial y hasta 20 adjuntos con Agregar certificado u otra página. También se admiten enlaces http(s). Guarda y sincroniza primero una ficha nueva antes de cargar archivos; la carga requiere conexión y después se guarda la ficha para asociarlos.
+
+Los archivos cargados se guardan en R2 privado y se leen mediante sesión autenticada: administración o el titular de la ficha. Cocina no obtiene acceso a documentos ajenos. La base conserva las referencias y la migración 0012 añade documents_json sin borrar datos. Ediciones desde clientes anteriores conservan enlaces y adjuntos omitidos. Los enlaces externos conservan los permisos del proveedor donde se alojan.

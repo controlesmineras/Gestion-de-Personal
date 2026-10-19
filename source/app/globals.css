@@ -132,3 +132,8 @@ body {
 .absence-return time{white-space:nowrap}
 .absence-return small{display:block;color:#536b7b;font-size:12px}
 .absence-return .return-finished{color:#8a5b16;font-weight:600}
+
+/* Documents stay inside the profile on narrow screens. */
+.document-actions{display:flex;flex-wrap:wrap;gap:10px;width:100%;margin:8px 0}.document-actions a{color:#175f85;text-decoration:underline;overflow-wrap:anywhere}.attachment-fields{display:grid;gap:12px}.attachment-row{display:flex;align-items:end;gap:8px}.attachment-row label{flex:1;min-width:0}.attachment-fields input[type=file]{max-width:100%;white-space:normal}.credential-list article{flex-wrap:wrap}.dashboard-people{width:100%;font-size:13px}.dashboard-people summary{cursor:pointer;margin-top:6px}.dashboard-people ul{max-height:240px;overflow:auto;padding-left:18px}.dashboard-people li{margin:9px 0}.dashboard-people small{display:block}.stats article>small{font-size:12px;line-height:1.5;grid-column:1/-1}.document-links{min-width:0}@media(max-width:600px){.document-links{grid-template-columns:1fr}.attachment-row{align-items:stretch;flex-direction:column}}
+
+.record-fields{display:contents}

@@ -1,0 +1,1 @@
+ALTER TABLE `people` ADD `documents_json` text DEFAULT '{}' NOT NULL;
