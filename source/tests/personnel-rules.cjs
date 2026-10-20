@@ -46,6 +46,10 @@ assert.equal((await call(admin,change,newAdmin.data.token)).status,200);assert.e
 const auditCount=sql.prepare('SELECT count(*) AS n FROM audit_logs').get().n;assert.equal((await call(admin,{type:'event',record:{...permit,id:'audit-overlap-one'}},newAdmin.data.token)).status,400);assert.equal(sql.prepare('SELECT count(*) AS n FROM audit_logs').get().n,auditCount);
 assert.equal((await call(admin,{type:'discipline',record:{id:'sanction-one-123',personId:'person-two-123',kind:'Sanción',reason:'Cambio',start:'2026-10-01',end:'2026-10-03'}},newAdmin.data.token)).status,400);
 
+// Company, role and phone are editable without second authorization.
+const administrativeEdit={...person,company:'E-SECURITY',role:'Escolta',phone:'3001234567'};
+assert.equal((await call(admin,{type:'person',record:administrativeEdit},newAdmin.data.token)).status,200);
+assert.equal((await call(admin,{type:'person',record:person},newAdmin.data.token)).status,200);
 // Sizes persist and older clients cannot erase fields they did not send.
 const sized={...person,shirtSize:'M',pantsSize:'32'};
 assert.equal((await call(admin,{type:'person',record:sized},newAdmin.data.token)).status,200);
