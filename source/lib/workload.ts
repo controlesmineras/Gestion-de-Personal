@@ -1,3 +1,4 @@
+import {serviceGroup} from './service-groups';
 import type {Person,PersonnelEvent} from './personnel';
 export type WorkSettings={id:string;minRestHours:number;maxWorkHours24:number};
 export const DEFAULT_WORK_SETTINGS:WorkSettings={id:'workload-settings',minRestHours:8,maxWorkHours24:12};
@@ -8,6 +9,6 @@ export function workload(person:Person,events:PersonnelEvent[],settings:WorkSett
  const active=events.find(e=>e.personId===person.id&&Date.parse(e.start)<=now&&Date.parse(e.end)>now),lastEnd=service.map(e=>Date.parse(e.end)).filter(end=>Number.isFinite(end)&&end<=now).sort((a,b)=>b-a)[0],inService=active?.kind==='Servicio',restHours=inService?0:lastEnd===undefined?null:Math.max(0,(now-lastEnd)/3600000),restRemaining=restHours===null?0:Math.max(0,settings.minRestHours-restHours),hours24=worked/3600000;
  let status=person.status==='Descanso'?'En descanso':person.status;if(status!=='Inactivo'){if(active)status=active.kind==='Servicio'?'En servicio':active.kind==='Vacaciones'?'De vacaciones':active.kind==='Incapacidad'?'Incapacitado':'De permiso';else if(['Disponible','En descanso'].includes(status)&&lastEnd!==undefined)status=restRemaining>0?'En descanso':'Disponible';}
  const overloaded=hours24>=settings.maxWorkHours24,needsRest=!inService&&restRemaining>0,alert=overloaded?'Sobrecarga':needsRest?'Descanso pendiente':'Sin alerta',canAssign=status==='Disponible'&&!overloaded&&!needsRest;
- return{status,hours24,restHours,restRemaining,lastEnd,lastEndLabel:lastEnd===undefined?'Sin servicios anteriores':new Date(lastEnd).toISOString(),overloaded,needsRest,alert,canAssign};
+ return{status,hours24,restHours,restRemaining,lastEnd,lastEndLabel:lastEnd===undefined?'Sin servicios anteriores':new Date(lastEnd).toISOString(),overloaded,needsRest,alert,canAssign,canAssignMine:canAssign&&serviceGroup(person)==='Seguridad',serviceGroup:serviceGroup(person)};
 }
 export const formatHours=(value:number)=>value.toLocaleString('es-CO',{maximumFractionDigits:1})+' h';
