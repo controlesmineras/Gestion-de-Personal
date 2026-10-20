@@ -93,7 +93,7 @@ La cuenta regresiva se actualiza con el reloj de la app. Ausencias consecutivas 
 
 ## Disponibilidad, novedades y documentos
 
-El dashboard usa el grupo visible (SEGURIDAD o COCINA), incluye SK y E-SECURITY y permite ver los nombres que forman el total. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
+El dashboard cuenta al personal asignado al grupo seleccionado y desglosa SK y E-SECURITY, salvo Gerencia, cuya tarjeta omite SK. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
 
 La ficha permite programar o registrar Permiso, Vacaciones e Incapacidad, con fechas inclusivas y sin restricción al día actual. La ausencia cambia el estado durante su intervalo y se verifica en los cruces de servicios, actividades y alimentos. El portal personal incluye estas novedades y su cola local.
 
@@ -104,17 +104,19 @@ Los archivos cargados se guardan en R2 privado y se leen mediante sesión autent
 En Editar ficha, Disponibilidad / novedad permite elegir Permiso, Vacaciones o Incapacidad y exige Fecha de inicio y Fecha final (incluida), además del motivo o DETALLE. Guarda el período en el historial de novedades y la cola local existente; el estado se calcula durante esas fechas, sin dejar una ausencia manual permanente. Al editar una ausencia vigente se conserva su identificador. Se rechazan fechas invertidas y cruces; los permisos de más de diez días conservan su autorización adicional. Los datos básicos siguen protegidos por la autorización de otro administrador.
 
 
-## Grupos de servicio: Seguridad, Gerencia y Alimentos
+## Grupos de servicio: Gerencia, Seguridad, Administrativo y Alimentos
 
-Las tres pestañas superiores separan las fichas, contadores, servicios, actividades y seguimiento del personal por grupo. El cargo y el grupo son campos independientes: un Escolta puede estar asignado a Seguridad o a Gerencia. En Editar ficha, Grupo de servicio permite registrar un traslado; el historial de cambios conserva el grupo anterior, el nuevo, la fecha y el administrador. No se mueven automáticamente los escoltas existentes: los registros sin grupo conservan Seguridad, salvo Preparación de alimentos, que conserva Alimentos.
+Las cuatro pestañas son vistas de consulta: no modifican el cargo, estado ni grupo asignado. Seguridad muestra a todos excepto Conductor y Preparación de alimentos, incluidos los funcionarios de Gerencia y Administrativo. Ordena por Director de seguridad, Jefe de seguridad, Supervisor, SST, Escolta y Operador de seguridad, y alfabéticamente dentro de cada cargo. Gerencia y Administrativo muestran únicamente a quienes estén asignados a su grupo; Alimentos reúne cocina y conducción.
 
-Gerencia es una asignación permanente hasta registrar traslado. Sus integrantes solo se pueden asignar a servicios y actividades de Gerencia, incluso cuando acompañan al gerente a mina. No forman parte del listado ni del contador de disponibles para Seguridad. La asignación no crea horas trabajadas: se mantienen los servicios reales, permisos, vacaciones, incapacidades y controles de carga/descanso. Los reportes de alimentos y el historial de cambios siguen siendo consultas globales claramente identificadas.
+Los contadores de personal, disponibilidad, servicios y horas mantienen el grupo asignado, independiente del listado general de Seguridad. Gerencia no muestra el desglose SK en su tarjeta. Los funcionarios de Gerencia y Administrativo aparecen identificados como reservados para su grupo, no como listos para servicios de Seguridad. Las actividades, servicios y capacitaciones conservan su consulta por grupo; alimentos e historial de cambios siguen siendo consultas globales.
 
-El servidor verifica el grupo al validar y al escribir cada servicio o actividad. Los clientes anteriores no pueden asignar a Gerencia a servicios generales ni borrar un grupo que no enviaron al editar otra información. La migración 0015 solo agrega columnas; conserva fichas, credenciales e historial. Las pruebas de personal cubren grupos, traslados, reservas, cruces de ausencia, auditoría y cambios de grupo entre validación y escritura.
+El cargo y el grupo son campos independientes. Editar ficha > Grupo de servicio registra el traslado con su historial; cambiar de pestaña nunca lo hace. No se trasladan automáticamente registros existentes. Los registros sin grupo conservan Seguridad, salvo cocina y conducción, que se agrupan en Alimentos. Los clientes anteriores no pueden borrar un grupo omitido al editar otra información ni asignar personal de Gerencia o Administrativo a servicios generales.
+
+El servidor verifica el grupo al validar y al escribir servicios y actividades, incluso ante cambios simultáneos desde otro dispositivo. La asignación no crea horas trabajadas: se mantienen los servicios reales, permisos aplicables al cargo, vacaciones, incapacidades y controles de carga y descanso. Agregar Administrativo no requiere migración ni altera fichas, credenciales o historial.
 
 ### Conductores y registro común
 
-Todos los administradores ven Gerencia, Seguridad y Alimentos y usan el mismo botón Registrar funcionario. El cargo Conductor se organiza en Alimentos, sin disponibilidad para servicios, y conserva permisos, historial y regreso previsto. El servidor aplica la misma restricción al guardar asignaciones.
+Todos los administradores ven Gerencia, Seguridad, Administrativo y Alimentos y usan el mismo botón Registrar funcionario. El cargo Conductor se organiza en Alimentos, sin disponibilidad para servicios, y conserva permisos, historial y regreso previsto. El servidor aplica la misma restricción al guardar asignaciones.
 
 ### Excepción de permisos
 
