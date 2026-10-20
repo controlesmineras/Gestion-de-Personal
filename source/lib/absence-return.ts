@@ -2,12 +2,20 @@ import type {Person,PersonnelEvent} from './personnel';
 const DAY=86400000,MINUTE=60000;
 export const isAbsence=(event:PersonnelEvent)=>['Permiso','Vacaciones','Incapacidad'].includes(event.kind);
 export const hasAbsenceStatus=(person:Person)=>['De permiso','De vacaciones','Incapacitado','Permiso extraordinario por calamidad'].includes(person.status);
-export function returnDateTime(iso:string):string{
+export function returnDateTime(iso:string,clock24=false):string{
  const time=Date.parse(iso);if(!Number.isFinite(time))return 'Por registrar';
- const parts=new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h12'}).formatToParts(new Date(time));
+ const parts=new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:clock24?'h23':'h12'}).formatToParts(new Date(time));
  const value=(type:string)=>parts.find(part=>part.type===type)?.value||'';
+ const formatted=value('day')+'/'+value('month')+'/'+value('year')+', '+value('hour')+':'+value('minute');
+ if(clock24)return formatted+(value('hour')==='00'&&value('minute')==='00'?' (inicio del día)':'');
  const hour24=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',hour:'numeric',hourCycle:'h23'}).format(new Date(time));
- return value('day')+'/'+value('month')+'/'+value('year')+', '+value('hour')+':'+value('minute')+(Number(hour24)<12?' a. m.':' p. m.');
+ return formatted+(Number(hour24)<12?' a. m.':' p. m.');
+}
+// Stored end is exclusive. Display the last included minute without changing the period.
+export function absenceDates(endIso:string){
+ const end=Date.parse(endIso);if(!Number.isFinite(end))return null;
+ const lastIncludedAt=new Date(end-1).toISOString();
+ return{lastIncludedAt,lastIncludedDateTime:returnDateTime(lastIncludedAt),returnDateTime:returnDateTime(endIso,true)};
 }
 export function absenceReturn(event:PersonnelEvent,now=Date.now()){
  const start=Date.parse(event.start),end=Date.parse(event.end);

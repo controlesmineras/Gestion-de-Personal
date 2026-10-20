@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
 const mod={exports:{}};
 vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/absence-return.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:mod,exports:mod.exports,Date,Intl});
-const {returnDateTime,absenceReturn,personReturnEvent}=mod.exports;
+const {returnDateTime,absenceDates,absenceReturn,personReturnEvent}=mod.exports;
 const now=Date.parse('2026-10-18T12:00:00-05:00'),p={id:'person-a',status:'Disponible'};
 const e={id:'absence-a',personId:p.id,kind:'Permiso',start:'2026-10-15T05:00:00.000Z',end:'2026-10-23T05:00:00.000Z'};
 assert.equal(returnDateTime(e.end),'23/10/2026, 12:00 a. m.');
@@ -26,3 +26,15 @@ const separated={...next,start:'2026-10-24T05:00:00.000Z'};
 assert.equal(personReturnEvent(p,[e,separated],now).end,e.end);
 assert.equal(absenceReturn({...e,kind:'Incapacidad'},now).phase,'active');
 console.log('PASS return forecast: Colombia midnight/noon, inclusive-day return, countdown, expiry, historical preservation, missing dates, contiguous periods and person isolation');
+
+const november={...e,kind:'Incapacidad',start:'2026-10-18T05:00:00.000Z',end:'2026-11-17T05:00:00.000Z'};
+assert.equal(absenceDates(november.end).lastIncludedDateTime,'16/11/2026, 11:59 p. m.');
+assert.equal(absenceDates(november.end).returnDateTime,'17/11/2026, 00:00 (inicio del día)');
+assert.equal(absenceDates(november.end).lastIncludedAt,'2026-11-17T04:59:59.999Z');
+assert.equal(absenceReturn(november,Date.parse('2026-11-17T04:59:59.999Z')).phase,'active');
+assert.equal(absenceReturn(november,Date.parse(november.end)).phase,'finished');
+assert.equal(absenceDates('2027-01-01T00:00:00-05:00').lastIncludedDateTime,'31/12/2026, 11:59 p. m.');
+assert.equal(absenceDates('2026-11-01T05:00:00Z').lastIncludedDateTime,'31/10/2026, 11:59 p. m.');
+assert.equal(absenceDates('bad'),null);
+assert.equal(returnDateTime('2026-11-17T17:00:00Z',true),'17/11/2026, 12:00');
+console.log('PASS inclusive end display, distinct midnight return, year/month boundaries and unchanged availability cutoff');

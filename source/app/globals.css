@@ -149,3 +149,5 @@ body {
 /* Shared actions stay outside the group tabs. */
 .admin-common-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}.heading{flex-wrap:wrap}
 @media(max-width:600px){.admin-common-actions{width:100%;justify-content:flex-start}.admin-common-actions .primary{flex:1}}
+
+.absence-dates{display:grid;gap:4px;line-height:1.45}.absence-dates small{display:block;font-size:12px;color:#536b7b}
