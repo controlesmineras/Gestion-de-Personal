@@ -1,6 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict');
+const policy={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/permission-policy.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:policy,exports:policy.exports});
 const mod={exports:{}};
-vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/absence-return.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:mod,exports:mod.exports,Date,Intl});
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/absence-return.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:mod,exports:mod.exports,Date,Intl,require:id=>{assert.equal(id,'./permission-policy');return policy.exports}});
 const {returnDateTime,absenceDates,absenceReturn,personReturnEvent}=mod.exports;
 const now=Date.parse('2026-10-18T12:00:00-05:00'),p={id:'person-a',status:'Disponible'};
 const e={id:'absence-a',personId:p.id,kind:'Permiso',start:'2026-10-15T05:00:00.000Z',end:'2026-10-23T05:00:00.000Z'};
@@ -38,3 +39,10 @@ assert.equal(absenceDates('2026-11-01T05:00:00Z').lastIncludedDateTime,'31/10/20
 assert.equal(absenceDates('bad'),null);
 assert.equal(returnDateTime('2026-11-17T17:00:00Z',true),'17/11/2026, 12:00');
 console.log('PASS inclusive end display, distinct midnight return, year/month boundaries and unchanged availability cutoff');
+
+for(const role of policy.exports.PERMISSION_EXEMPT_ROLES){
+ const exempt={...p,role,status:'De permiso'};assert.equal(personReturnEvent(exempt,[e],now),null);assert.equal(mod.exports.hasAbsenceStatus(exempt),false);
+ assert.equal(personReturnEvent({...exempt,status:'Disponible'},[{...e,kind:'Vacaciones'}],now).kind,'Vacaciones');
+ assert.equal(personReturnEvent({...exempt,status:'Disponible'},[{...e,kind:'Incapacidad'}],now).kind,'Incapacidad');
+}
+console.log('PASS permission exemption removes only permission return forecasts');

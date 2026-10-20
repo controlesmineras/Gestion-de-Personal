@@ -107,3 +107,7 @@ El servidor verifica el grupo al validar y al escribir cada servicio o actividad
 ### Registro común y conductores
 
 Todos los administradores consultan los mismos grupos (Gerencia, Seguridad y Alimentos) y usan un único botón Registrar funcionario. El cargo Conductor se agrupa en Alimentos, conserva permisos y regreso previsto, y se muestra como Asignado a conducción cuando no tiene una novedad activa. No integra los disponibles ni puede asignarse a servicios o actividades de servicio; la validación se repite en la escritura del servidor. Compartir grupo con cocina no concede acceso al portal de preparación de alimentos. Los registros existentes solo cambian de cargo cuando un administrador los edita.
+
+### Excepción de permisos por cargo
+
+Director de seguridad, Jefe de seguridad y Supervisor no llevan control de sus propios permisos: no hay registro nuevo, edición, conteo ni avisos de regreso por permiso. Los registros anteriores siguen disponibles como historial y no afectan la disponibilidad ni los alimentos. Vacaciones e incapacidades conservan sus reglas. La excepción se comprueba con el cargo del funcionario en el servidor, también al escribir, y no concede ni retira acceso de administrador. Los administradores de esos cargos pueden gestionar los permisos del resto del personal.

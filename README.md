@@ -115,3 +115,7 @@ El servidor verifica el grupo al validar y al escribir cada servicio o actividad
 ### Conductores y registro común
 
 Todos los administradores ven Gerencia, Seguridad y Alimentos y usan el mismo botón Registrar funcionario. El cargo Conductor se organiza en Alimentos, sin disponibilidad para servicios, y conserva permisos, historial y regreso previsto. El servidor aplica la misma restricción al guardar asignaciones.
+
+### Excepción de permisos
+
+Director de seguridad, Jefe de seguridad y Supervisor no llevan control de sus propios permisos. Se conserva el historial anterior, sin conteos ni alertas por permiso. Vacaciones, incapacidades y facultades administrativas sobre el resto del personal conservan su funcionamiento.

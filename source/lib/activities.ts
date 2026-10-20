@@ -1,3 +1,4 @@
+import {controlsEvent} from './permission-policy';
 import {assignmentError,validateServiceGroup} from './service-groups';
 import type {Data,Person,PersonnelEvent} from './personnel';
 import {workload,DEFAULT_WORK_SETTINGS} from './workload';
@@ -7,7 +8,7 @@ export function validateActivity(input:any):Activity{const text=(v:any,n:number)
 export function activityAvailability(person:Person,data:Data,start:string,end:string,activityId='',scope=''){
  const restricted=assignmentError(person,scope);if(restricted)return{available:false,reason:restricted};
  const from=Date.parse(start),to=Date.parse(end);if(!Number.isFinite(from)||!Number.isFinite(to)||to<=from)return{available:false,reason:'Completa el horario'};
- const events=data.events.filter(e=>e.activityId!==activityId||!activityId);
+ const events=data.events.filter(e=>controlsEvent(person,e)&&(e.activityId!==activityId||!activityId));
  const conflict=events.find(e=>e.personId===person.id&&Date.parse(e.start)<to&&Date.parse(e.end)>from);if(conflict)return{available:false,reason:'Cruce con '+(conflict.activityId?'otra actividad':conflict.kind.toLowerCase())};
  const w=workload(person,events,data.workSettings||DEFAULT_WORK_SETTINGS,from);return{available:w.canAssign,reason:w.canAssign?'Disponible para este horario':w.status!=='Disponible'?w.status:w.alert};
 }

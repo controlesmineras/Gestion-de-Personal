@@ -1,7 +1,8 @@
+import {controlsEvent,effectiveBaseStatus} from './permission-policy';
 import type {Person,PersonnelEvent} from './personnel';
 const DAY=86400000,MINUTE=60000;
 export const isAbsence=(event:PersonnelEvent)=>['Permiso','Vacaciones','Incapacidad'].includes(event.kind);
-export const hasAbsenceStatus=(person:Person)=>['De permiso','De vacaciones','Incapacitado','Permiso extraordinario por calamidad'].includes(person.status);
+export const hasAbsenceStatus=(person:Person)=>['De permiso','De vacaciones','Incapacitado','Permiso extraordinario por calamidad'].includes(effectiveBaseStatus(person)||'');
 export function returnDateTime(iso:string,clock24=false):string{
  const time=Date.parse(iso);if(!Number.isFinite(time))return 'Por registrar';
  const parts=new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:clock24?'h23':'h12'}).formatToParts(new Date(time));
@@ -28,7 +29,7 @@ export function absenceReturn(event:PersonnelEvent,now=Date.now()){
 }
 // Connected absences postpone the expected return; the original records stay intact.
 export function personReturnEvent(person:Person,events:PersonnelEvent[],now=Date.now()):PersonnelEvent|null{
- const own=events.filter(event=>event.personId===person.id&&absenceReturn(event,now)).sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
+ const own=events.filter(event=>event.personId===person.id&&controlsEvent(person,event)&&absenceReturn(event,now)).sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
  const active=own.find(event=>Date.parse(event.start)<=now&&Date.parse(event.end)>now);
  if(active){
   let end=Date.parse(active.end);

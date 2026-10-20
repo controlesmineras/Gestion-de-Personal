@@ -24,3 +24,11 @@ const long={...person,...profileAbsenceDraft(person,[]),status:'De permiso',abse
 assert.throws(()=>prepareProfileAbsence(long,person,[]),/autoriz/);assert.equal(prepareProfileAbsence({...long,absenceAuthorizedBy:'Administrador'},person,[]).event.extraDays,1);
 assert.equal(prepareProfileAbsence(person,person,[]).event,null);
 console.log('PASS: dates, inclusive periods, future/current/ended absences, three kinds, overlap rejection, editing IDs, offline replay and extended permissions');
+
+for(const role of ['Director de seguridad','Jefe de seguridad','Supervisor']){
+ const exempt={...person,role,status:'De permiso'},old={id:'old-permission-123',personId:person.id,kind:'Permiso',start:'2026-10-21T05:00:00Z',end:'2026-10-22T05:00:00Z'};
+ assert.equal(profileAbsenceDraft(exempt,[old],Date.parse(old.start)).status,'Disponible');
+ assert.throws(()=>prepareProfileAbsence({...long,role,absenceEnd:'2026-10-05'},exempt,[]),/control de permisos/);
+ const vacation=prepareProfileAbsence({...long,role,status:'De vacaciones',absenceStart:'2026-10-21',absenceEnd:'2026-10-21'},exempt,[old]);assert.equal(vacation.event.kind,'Vacaciones');assert.equal(prepareProfileAbsence({...long,role,status:'De vacaciones',absenceEnd:'2026-10-05'},{...exempt,status:'Permiso extraordinario por calamidad'},[]).person.status,'Disponible');
+}
+console.log('PASS exempt profiles skip old permission status, reject new permits and keep vacation reporting');
