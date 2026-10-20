@@ -11,3 +11,9 @@ assert.equal(run([e(1,4)]).hours24,0);assert.equal(run([e(-50,-30)]).hours24,0);
 assert.equal(run([e(-12,-3),e(-1,2,'Vacaciones')]).status,'De vacaciones');assert.equal(run([e(-12,-3)],{...p,status:'Inactivo'}).status,'Inactivo');assert.equal(run([e(-12,-3)],{...p,status:'No disponible'}).status,'No disponible');assert.equal(run([],{...p,status:'Descanso'}).status,'En descanso');
 assert.equal(run([e(-12,-3)],p,{id:'workload-settings',minRestHours:2,maxWorkHours24:10}).canAssign,true);assert.throws(()=>validateWorkSettings({minRestHours:25,maxWorkHours24:12}));assert.throws(()=>validateWorkSettings({minRestHours:8,maxWorkHours24:0}));assert.equal(validateWorkSettings({minRestHours:7.5,maxWorkHours24:10.5}).minRestHours,7.5);
 console.log('PASS rolling 24h clipping, active services, future exclusion, union of overlaps, exact rest boundary, overload threshold, absence/restricted states and configurable limits');
+
+const driver={...p,role:'Conductor'};
+assert.equal(run([],driver).status,'Asignado a conducción');assert.equal(run([],driver).canAssign,false);assert.equal(run([],driver).canAssignMine,false);assert.equal(run([],driver).serviceGroup,'Alimentos');
+assert.equal(run([e(-1,2,'Permiso')],driver).status,'De permiso');assert.equal(run([e(-12,-4,'Permiso')],driver).status,'Asignado a conducción');
+assert.equal(run([e(1,3,'Permiso')],driver).status,'Asignado a conducción');assert.equal(run([],{...driver,status:'Inactivo'}).status,'Inactivo');assert.equal(run([e(-12,-3)],driver).status,'En descanso');assert.equal(run([e(-1,2,'Vacaciones')],driver).status,'De vacaciones');
+console.log('PASS driver availability independent of leave, inactivity, rest and vacation');

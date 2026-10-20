@@ -177,6 +177,36 @@ assert.equal((await call(admin,{type:'event',record:absence})).status,200);
 assert.equal((await call(admin,{type:'event',record:{...managedEvent,id:'management-overlap-one',start:'2027-01-15T08:00:00-05:00',end:'2027-01-15T12:00:00-05:00'}})).status,400);
 console.log('PASS service groups: separate pools, same job role, no invented hours, legacy preservation, management-only services and activities, atomic transfer race, audit and absences');
 
+// Drivers share the Alimentos view, but never enter the assignment pool or kitchen permissions.
+const driver={...person,id:'driver-person-one',document:'driver-001',role:'Conductor',status:'Disponible',serviceGroup:'Seguridad'};
+assert.equal((await call(admin,{type:'person',record:driver},newAdmin.data.token)).status,200);
+const storedDriver=(await call(admin,null,anotherAdmin.data.token)).data.people.find(p=>p.id===driver.id);
+assert.equal(storedDriver.serviceGroup,'Alimentos');assert.equal(groups.serviceGroup({role:'Conductor'}),'Alimentos');
+for(const token of ['admin-secret',newAdmin.data.token,anotherAdmin.data.token]){const ids=(await call(admin,null,token)).data.people.map(p=>p.id);assert.ok(ids.includes(driver.id));assert.ok(ids.includes(escort.id));}
+const driverSummary=dashboardGroups.dashboardSummary({people:[storedDriver],events:[]},'Alimentos',clock);
+assert.equal(driverSummary.people.length,1);assert.equal(driverSummary.available.length,0);assert.equal(driverSummary.ready.length,0);
+assert.equal(work.workload(storedDriver,[],undefined,clock).status,'Asignado a conducción');
+for(const scope of ['',...groups.SERVICE_GROUPS]){assert.match(groups.assignmentError(storedDriver,scope),/conducción/);assert.equal((await call(admin,{type:'event',record:{...managedEvent,id:'driver-service-reject',personId:driver.id,serviceGroup:scope}})).status,400);}
+const driverActivity={...managedActivity,id:'driver-activity-reject',serviceGroup:'Alimentos',coordinatorId:driver.id,participants:[{personId:driver.id,function:'Conductor'}]};
+assert.equal((await call(admin,{type:'activity',record:driverActivity})).status,400);
+const driverPermission={...absence,id:'driver-permission-one',personId:driver.id};
+assert.equal((await call(admin,{type:'event',record:driverPermission})).status,200);
+const savedPermission=(await call(admin,null)).data.events.find(e=>e.id===driverPermission.id);
+assert.equal(rules.permissionDays(savedPermission.start,savedPermission.end),2);
+assert.equal(rules.personStatus(storedDriver,[savedPermission],Date.parse(savedPermission.start)-1),'Asignado a conducción');
+assert.equal(rules.personStatus(storedDriver,[savedPermission],Date.parse(savedPermission.start)),'De permiso');
+assert.equal(rules.personStatus(storedDriver,[savedPermission],Date.parse(savedPermission.end)),'Asignado a conducción');
+assert.equal(work.workload(storedDriver,[savedPermission],undefined,Date.parse(savedPermission.end)).canAssign,false);
+const driverInvite=await call(admin,{type:'invite',personId:driver.id,accessRole:'Laboral'});
+const driverLogin=await call(self,{action:'activate',document:driver.document,password:'driver-private-password',invitation:driverInvite.data.url.split('#activate=')[1]},'');assert.equal(driverLogin.status,200);
+assert.equal((await call(load('app/api/kitchen/route.ts'),null,driverLogin.data.token)).status,401);
+assert.equal((await call(self,{action:'permission',record:{...driverPermission,id:'driver-own-permission',start:'2027-02-01T00:00:00-05:00',end:'2027-02-03T00:00:00-05:00'}},driverLogin.data.token)).status,200);
+// Reject a service if another administrator changes the role to Conductor between validation and insertion.
+sql.prepare("UPDATE people SET role='Operador de seguridad',service_group='Alimentos' WHERE id=?").run(driver.id);
+await assert.rejects(()=>server.saveEvent({...managedEvent,id:'driver-race-service',personId:driver.id,serviceGroup:'Alimentos'},undefined,async statement=>{sql.prepare("UPDATE people SET role='Conductor' WHERE id=?").run(driver.id);return statement.run()}),/grupo asignado/);
+assert.equal(sql.prepare('SELECT id FROM events WHERE id=?').get('driver-race-service'),undefined);
+console.log('PASS driver: shared admin visibility, Alimentos grouping, no availability/services/activities, leave duration and return boundaries, personal permission reporting, kitchen isolation and atomic role-change race');
+
 const down=await call(admin,{type:'invite',personId:'person-admin-123',accessRole:'Laboral'});const downgraded=await call(self,{action:'activate',document:'103',password:'laboral-person-password',invitation:down.data.url.split('#activate=')[1],accessRole:'Administrador'},'');assert.equal(downgraded.status,200);assert.equal(downgraded.data.accessRole,'Laboral');assert.equal((await call(admin,null,newAdmin.data.token)).status,401);assert.equal((await call(admin,null,downgraded.data.token)).status,401);
 await sql.exec("UPDATE people SET status='Inactivo' WHERE id='person-one-123'");assert.equal((await call(admin,null,anotherAdmin.data.token)).status,401);assert.equal((await call(adminAuth,{action:'login',username:'101',password:'second-admin-password'},'')).status,401);
 for(let i=0;i<10;i++)assert.equal((await call(self,{action:'login',document:'102',code:'wrong'},'')).status,401);assert.equal((await call(self,{action:'login',document:'102',code:'wrong'},'')).status,429);

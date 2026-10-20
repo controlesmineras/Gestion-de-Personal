@@ -111,3 +111,7 @@ Las tres pestañas superiores separan las fichas, contadores, servicios, activid
 Gerencia es una asignación permanente hasta registrar traslado. Sus integrantes solo se pueden asignar a servicios y actividades de Gerencia, incluso cuando acompañan al gerente a mina. No forman parte del listado ni del contador de disponibles para Seguridad. La asignación no crea horas trabajadas: se mantienen los servicios reales, permisos, vacaciones, incapacidades y controles de carga/descanso. Los reportes de alimentos y el historial de cambios siguen siendo consultas globales claramente identificadas.
 
 El servidor verifica el grupo al validar y al escribir cada servicio o actividad. Los clientes anteriores no pueden asignar a Gerencia a servicios generales ni borrar un grupo que no enviaron al editar otra información. La migración 0015 solo agrega columnas; conserva fichas, credenciales e historial. Las pruebas de personal cubren grupos, traslados, reservas, cruces de ausencia, auditoría y cambios de grupo entre validación y escritura.
+
+### Conductores y registro común
+
+Todos los administradores ven Gerencia, Seguridad y Alimentos y usan el mismo botón Registrar funcionario. El cargo Conductor se organiza en Alimentos, sin disponibilidad para servicios, y conserva permisos, historial y regreso previsto. El servidor aplica la misma restricción al guardar asignaciones.
