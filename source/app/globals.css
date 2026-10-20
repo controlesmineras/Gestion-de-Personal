@@ -141,3 +141,5 @@ body {
 .company-availability{display:grid;gap:8px;margin:14px 0 0}.company-availability>div{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 12px;border:1px solid #dce5ec;background:#f5f8fa;border-radius:8px;padding:8px 10px}.company-availability dt{font-size:12px;font-weight:650;overflow-wrap:anywhere}.company-availability dd{margin:0;font-size:18px;font-weight:750;line-height:1.2}.ready-availability{display:block;margin:14px 0 0;padding-top:12px;border-top:1px solid #dce5ec;font-size:12px;line-height:1.5}.ready-availability strong{font-size:15px}.stats{align-items:start}
 
 .gp-table tbody tr.person-available>td{background:#edf8f0}.gp-table tbody tr.person-available:hover>td{background:#e0f2e6}
+
+.basic-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;border:1px solid #dce3e8;border-radius:12px;padding:16px;min-width:0}.basic-fields:disabled{background:#f5f7f9}.basic-fields:disabled input{color:#475569}.basic-authorization{display:grid;gap:10px}.basic-fields legend{font-weight:600}@media(max-width:600px){.basic-fields{grid-template-columns:1fr}}

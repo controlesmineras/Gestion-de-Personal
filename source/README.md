@@ -89,3 +89,9 @@ Número de documento sigue siendo la identificación única. Cédula y licencias
 Los archivos cargados se guardan en R2 privado y se leen mediante sesión autenticada: administración o el titular de la ficha. Cocina no obtiene acceso a documentos ajenos. La base conserva las referencias y la migración 0012 añade documents_json sin borrar datos. Ediciones desde clientes anteriores conservan enlaces y adjuntos omitidos. Los enlaces externos conservan los permisos del proveedor donde se alojan.
 
 Disponibilidad permite seleccionar Incapacidad y completar DETALLE (obligatorio). Se conserva en la ficha, la sincronización y la auditoría; no se borra al editar desde un cliente anterior. En las novedades fechadas de Incapacidad, el campo de motivo se presenta como DETALLE.
+
+## Tallas y autorización de datos básicos
+
+La ficha registra TALLA CAMISA y TALLA PANTALÓN, opcionales y editables sin autorización adicional. Las versiones anteriores conservan los valores que no envían.
+
+En funcionarios existentes, documento, nombres, apellidos, empresa, cargo y teléfono permanecen bloqueados. Otro administrador activo debe ingresar su documento/usuario y contraseña para autorizar la edición. El servidor comprueba nuevamente su sesión y que sea diferente del administrador que guarda; la corrección requiere conexión y no entra en la cola local. No se guardan las credenciales ni la sesión del autorizador en el dispositivo. El historial conserva quién modificó, quién autorizó y los valores anteriores y nuevos. La creación inicial de una ficha no requiere segunda autorización.
