@@ -1,0 +1,1 @@
+ALTER TABLE `people` ADD `escort_principal` text DEFAULT '' NOT NULL;
