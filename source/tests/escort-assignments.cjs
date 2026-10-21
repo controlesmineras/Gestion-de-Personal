@@ -31,6 +31,11 @@ const current=()=>sql.prepare('SELECT '+personColumns+' FROM people WHERE id=?')
 (async()=>{
  for(const labor of ['Escolta de Gerencia','Escolta del director de Seguridad','Servicios generales','Administrativo','Alimentos'])assert.equal(laborValue({...base,...laborFields(labor)}),labor);
  assert.equal(laborValue(base),'');
+ const tabPeople=[base,{...base,id:'person-gere',escortPrincipal:'Gerencia'},{...base,id:'person-dire',role:'Operador de seguridad',escortPrincipal:'Director de Seguridad'},{...base,id:'person-libre',serviceGroup:'Personal',escortPrincipal:'Gerencia'},{...base,id:'person-cargo',serviceGroup:undefined}];
+ assert.deepEqual(personnelForGroup(tabPeople,'Escoltas').map(p=>p.id).sort(),['person-dire','person-gere']);
+ assert.deepEqual(dashboardSummary({people:tabPeople,events:[]},'Escoltas',now).people.map(p=>p.id).sort(),['person-dire','person-gere']);
+ assert.equal(personnelForGroup(tabPeople,'Personal').length,5);
+
  assert.equal((await post('person',base)).status,200);
  for(const principal of ['Gerencia','Director de Seguridad']){
   const op=crypto.randomUUID();

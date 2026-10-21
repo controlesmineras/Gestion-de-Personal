@@ -122,3 +122,5 @@ El cambio se guarda en la cola local y se sincroniza como una operación exclusi
 Verificación: `node tests/escort-assignments.cjs`.
 
 Labor actual usa un solo selector: Escolta de Gerencia, Escolta del director de Seguridad, Servicios generales, Administrativo o Alimentos. El grupo y el destinatario se derivan de esa selección, sin pedir dos campos al usuario.
+
+La pestaña Escoltas solo incluye las labores vigentes Escolta de Gerencia y Escolta del director de Seguridad; el cargo por sí solo no basta.

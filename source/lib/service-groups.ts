@@ -37,7 +37,7 @@ export function personnelForGroup<T extends AssignedPerson & {name:string}>(peop
  const selected=groupName(group),rank=(role?:string)=>{const index=SECURITY_ROLE_ORDER.indexOf(role||'');return index<0?SECURITY_ROLE_ORDER.length:index;};
  return people.filter(person=>selected==='Personal'
   ?person.role!=='Conductor'&&person.role!=='Preparación de alimentos'
-  :serviceGroup(person)===selected
+  :selected==='Escoltas'?hasEscortLabor(person):serviceGroup(person)===selected
  ).sort((a,b)=>(selected==='Personal'?rank(a.role)-rank(b.role):0)||a.name.localeCompare(b.name,'es'));
 }
 // Match serviceGroup exactly inside atomic writes, including legacy assignments.
@@ -71,4 +71,9 @@ export function laborFields(value:string){
  if(value==='Servicios generales')return {serviceGroup:'Personal',escortPrincipal:''};
  if(value==='Administrativo'||value==='Alimentos')return {serviceGroup:value,escortPrincipal:''};
  throw Error('Selecciona una labor válida.');
+}
+
+// The Escoltas tab follows the current duty, never the job title alone.
+export function hasEscortLabor(person:AssignedPerson){
+ return serviceGroup(person)==='Escoltas'&&(person.escortPrincipal==='Gerencia'||person.escortPrincipal==='Director de Seguridad');
 }
