@@ -109,3 +109,16 @@ Administrativo conserva su grupo y disponibilidad propios. Alimentos reúne coci
 ### Excepción de permisos por cargo
 
 Director de seguridad, Jefe de seguridad y Supervisor no llevan control de sus propios permisos: no hay registro nuevo, edición, conteo ni avisos de regreso por permiso. Los registros anteriores siguen disponibles como historial y no afectan la disponibilidad ni los alimentos. Vacaciones e incapacidades conservan sus reglas. La excepción se comprueba con el cargo del funcionario en el servidor, también al escribir, y no concede ni retira acceso de administrador. Los administradores de esos cargos pueden gestionar los permisos del resto del personal.
+
+
+## Labor actual de escoltas
+
+La ficha muestra Labor actual y permite Cambiar labor sin editar cargo, identidad ni disponibilidad base. Escoltas distingue Gerencia y Director de Seguridad. Las fichas anteriores sin destinatario permanecen reservadas y muestran «Escolta · asignado a por definir» hasta que un administrador lo seleccione; no se deduce el destinatario del cargo.
+
+La asignación persiste aunque finalice una actividad o se registre un ingreso a mina. Personal para servicios generales libera la reserva, pero conserva servicios activos, permisos, vacaciones, incapacidades y reglas de carga/descanso. Los escoltas reservados no aparecen como disponibles ni listos para asignar. Sus acompañamientos propios siguen permitidos desde Escoltas, sujetos a disponibilidad.
+
+El cambio se guarda en la cola local y se sincroniza como una operación exclusiva de asignación; el servidor exige administrador y registra fecha/hora, autor y valores antes/después. Ediciones normales de la ficha desde esta versión no sobrescriben la asignación. Clientes anteriores conservan el nuevo destinatario si lo omiten. La migración 0016 añade escort_principal con valor vacío, sin reclasificar personas ni modificar registros históricos.
+
+Verificación: `node tests/escort-assignments.cjs`.
+
+Labor actual usa un solo selector: Escolta de Gerencia, Escolta del director de Seguridad, Servicios generales, Administrativo o Alimentos. El grupo y el destinatario se derivan de esa selección, sin pedir dos campos al usuario.

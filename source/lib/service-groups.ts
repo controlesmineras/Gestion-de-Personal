@@ -1,6 +1,6 @@
 export const SERVICE_GROUPS=['Escoltas','Personal','Administrativo','Alimentos'] as const;
 export type ServiceGroup=typeof SERVICE_GROUPS[number];
-type AssignedPerson={role?:string;serviceGroup?:string};
+type AssignedPerson={role?:string;serviceGroup?:string;escortPrincipal?:string};
 // Keep historical records readable without rewriting their stored group.
 export function groupName(value?:string):string{
  return value==='Gerencia'?'Escoltas':value==='Seguridad'?'Personal':value||'';
@@ -42,3 +42,33 @@ export function personnelForGroup<T extends AssignedPerson & {name:string}>(peop
 }
 // Match serviceGroup exactly inside atomic writes, including legacy assignments.
 export const SERVICE_GROUP_SQL="CASE WHEN role IN ('Conductor','Preparación de alimentos') THEN 'Alimentos' WHEN service_group IN ('Personal','Escoltas','Administrativo','Alimentos') THEN service_group WHEN service_group='Gerencia' OR role='Escolta' THEN 'Escoltas' ELSE 'Personal' END";
+
+export const ESCORT_PRINCIPALS=['Gerencia','Director de Seguridad'] as const;
+export const GROUP_ASSIGNMENT_LABELS:Record<string,string>={Personal:'Personal para servicios generales',Escoltas:'Escolta',Administrativo:'Administrativo',Alimentos:'Alimentos'};
+export function validateEscortPrincipal(value:unknown,optional=false):string|undefined{
+ if(value===undefined&&optional)return undefined;
+ if(value===''&&optional)return '';
+ if(typeof value!=='string'||!ESCORT_PRINCIPALS.includes(value as typeof ESCORT_PRINCIPALS[number]))throw Error('Selecciona Gerencia o Director de Seguridad.');
+ return value;
+}
+export function assignmentLabel(person:AssignedPerson){
+ const group=serviceGroup(person);
+ return group==='Escoltas'?(person.escortPrincipal==='Gerencia'?'Escolta de Gerencia':person.escortPrincipal==='Director de Seguridad'?'Escolta del director de Seguridad':'Escolta · asignado a por definir'):GROUP_ASSIGNMENT_LABELS[group];
+}
+export function validateAssignment(input:any){
+ const serviceGroup=validateServiceGroup(input.serviceGroup);
+ return {id:input.id,serviceGroup,escortPrincipal:serviceGroup==='Escoltas'?validateEscortPrincipal(input.escortPrincipal):''};
+}
+
+export const LABOR_OPTIONS=['Escolta de Gerencia','Escolta del director de Seguridad','Servicios generales','Administrativo','Alimentos'];
+export function laborValue(person:AssignedPerson){
+ if(serviceGroup(person)==='Escoltas')return person.escortPrincipal?assignmentLabel(person):'';
+ return serviceGroup(person)==='Personal'?'Servicios generales':serviceGroup(person);
+}
+export function laborFields(value:string){
+ if(value==='Escolta de Gerencia')return {serviceGroup:'Escoltas',escortPrincipal:'Gerencia'};
+ if(value==='Escolta del director de Seguridad')return {serviceGroup:'Escoltas',escortPrincipal:'Director de Seguridad'};
+ if(value==='Servicios generales')return {serviceGroup:'Personal',escortPrincipal:''};
+ if(value==='Administrativo'||value==='Alimentos')return {serviceGroup:value,escortPrincipal:''};
+ throw Error('Selecciona una labor válida.');
+}
