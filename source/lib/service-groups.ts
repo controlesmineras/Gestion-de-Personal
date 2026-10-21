@@ -1,6 +1,6 @@
 export const SERVICE_GROUPS=['Escoltas','Personal','Administrativo','Alimentos'] as const;
 export type ServiceGroup=typeof SERVICE_GROUPS[number];
-type AssignedPerson={role?:string;serviceGroup?:string;escortPrincipal?:string};
+type AssignedPerson={company?:string;role?:string;serviceGroup?:string;escortPrincipal?:string};
 // Keep historical records readable without rewriting their stored group.
 export function groupName(value?:string):string{
  return value==='Gerencia'?'Escoltas':value==='Seguridad'?'Personal':value||'';
@@ -32,7 +32,7 @@ export function assignmentError(person:AssignedPerson,scope=''){
  return '';
 }
 // A personnel view never changes the assigned group used by availability and services.
-export const SECURITY_ROLE_ORDER:readonly string[]=['Director de seguridad','Jefe de seguridad','Supervisor','SST','Escolta','Operador de seguridad'];
+export const SECURITY_ROLE_ORDER:readonly string[]=['Director de seguridad','Jefe de seguridad','Encargado','Supervisor','SST','Escolta','Operador de seguridad'];
 export function personnelForGroup<T extends AssignedPerson & {name:string}>(people:readonly T[],group:string):T[]{
  const selected=groupName(group),rank=(role?:string)=>{const index=SECURITY_ROLE_ORDER.indexOf(role||'');return index<0?SECURITY_ROLE_ORDER.length:index;};
  return people.filter(person=>selected==='Personal'
@@ -76,4 +76,21 @@ export function laborFields(value:string){
 // The Escoltas tab follows the current duty, never the job title alone.
 export function hasEscortLabor(person:AssignedPerson){
  return serviceGroup(person)==='Escoltas'&&(person.escortPrincipal==='Gerencia'||person.escortPrincipal==='Director de Seguridad');
+}
+
+// The profile separates the service group from the current duty. Keep the existing
+// storage encoding so older clients and availability calculations remain compatible.
+export const PROFILE_SERVICE_GROUPS=['Personal','Administrativo','Alimentos'];
+export const PERSON_LABORS=['Disponible','Escolta'];
+export function profileServiceGroup(person:AssignedPerson){
+ const group=serviceGroup(person);return group==='Escoltas'?'Personal':group;
+}
+export function personLabor(person:AssignedPerson){
+ return profileServiceGroup(person)!=='Personal'?'':serviceGroup(person)==='Escoltas'?'Escolta':'Disponible';
+}
+export function escortPrincipalOptions(company?:string):string[]{
+ return company==='SK'?['Director de Seguridad']:[...ESCORT_PRINCIPALS];
+}
+export function validateCompanyAssignment(person:AssignedPerson){
+ if(person.company==='SK'&&serviceGroup(person)==='Escoltas'&&person.escortPrincipal==='Gerencia')throw Error('El personal de SK puede ser escolta del Director de Seguridad, pero no de Gerencia.');
 }
