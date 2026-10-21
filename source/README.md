@@ -80,7 +80,7 @@ Después de Generar actividad y desde cada tarjeta administrativa, Copiar mensaj
 
 ## Disponibilidad, novedades y documentos
 
-El dashboard cuenta al personal asignado al grupo seleccionado y desglosa SK y E-SECURITY, salvo Gerencia, cuya tarjeta omite SK. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
+El dashboard cuenta al personal asignado al grupo seleccionado y desglosa SK y E-SECURITY, salvo Escoltas, cuya tarjeta omite SK. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
 
 La ficha permite programar o registrar Permiso, Vacaciones e Incapacidad, con fechas inclusivas y sin restricción al día actual. La ausencia cambia el estado durante su intervalo y se verifica en los cruces de servicios, actividades y alimentos. El portal personal incluye estas novedades y su cola local.
 
@@ -96,19 +96,15 @@ La ficha registra TALLA CAMISA y TALLA PANTALÓN, opcionales y editables sin aut
 
 En funcionarios existentes, solo el número de documento, nombres y apellidos permanecen bloqueados. Empresa, cargo y teléfono se editan normalmente. Otro administrador activo debe ingresar su documento/usuario y contraseña para autorizar la edición. El servidor comprueba nuevamente su sesión y que sea diferente del administrador que guarda; la corrección requiere conexión y no entra en la cola local. No se guardan las credenciales ni la sesión del autorizador en el dispositivo. El historial conserva quién modificó, quién autorizó y los valores anteriores y nuevos. La creación inicial de una ficha no requiere segunda autorización.
 
-## Grupos de servicio: Gerencia, Seguridad, Administrativo y Alimentos
+## Grupos de servicio: Personal, Escoltas, Administrativo y Alimentos
 
-Las cuatro pestañas son vistas de consulta: no modifican el cargo, estado ni grupo asignado. Seguridad muestra a todos excepto Conductor y Preparación de alimentos, incluidos los funcionarios de Gerencia y Administrativo. Ordena por Director de seguridad, Jefe de seguridad, Supervisor, SST, Escolta y Operador de seguridad, y alfabéticamente dentro de cada cargo. Gerencia y Administrativo muestran únicamente a quienes estén asignados a su grupo; Alimentos reúne cocina y conducción.
+Seguridad se llama Personal y Gerencia se llama Escoltas. Personal muestra a todos excepto Conductor y Preparación de alimentos, ordenados por cargo y nombre. Incluye a los reservados para Escoltas y Administrativo, identificados como tales; el total de personal refleja esta lista. Los contadores Disponibles y Listos para asignar y el filtro Disponible incluyen únicamente el grupo Personal. Cambiar de pestaña no modifica fichas ni asignaciones.
 
-Los contadores de personal, disponibilidad, servicios y horas mantienen el grupo asignado, independiente del listado general de Seguridad. Gerencia no muestra el desglose SK en su tarjeta. Los funcionarios de Gerencia y Administrativo aparecen identificados como reservados para su grupo, no como listos para servicios de Seguridad. Las actividades, servicios y capacitaciones conservan su consulta por grupo; alimentos e historial de cambios siguen siendo consultas globales.
+Escoltas reúne las asignaciones anteriores a Gerencia y a quienes tienen cargo Escolta con el grupo anterior Seguridad o sin grupo. Esto incluye a los escoltas del director de Seguridad. No se reescriben fichas ni servicios históricos: la compatibilidad se aplica al leer y validar. Un traslado explícito posterior al nuevo grupo Personal sigue siendo posible desde Editar ficha > Grupo de servicio y queda auditado. Los nuevos escoltas proponen Escoltas como grupo; cargo y grupo siguen siendo campos distintos. Clientes anteriores no pueden asignar estos escoltas a servicios generales mediante los nombres antiguos.
 
-El cargo y el grupo son campos independientes. Editar ficha > Grupo de servicio registra el traslado con su historial; cambiar de pestaña nunca lo hace. No se trasladan automáticamente registros existentes. Los registros sin grupo conservan Seguridad, salvo cocina y conducción, que se agrupan en Alimentos. Los clientes anteriores no pueden borrar un grupo omitido al editar otra información ni asignar personal de Gerencia o Administrativo a servicios generales.
+Personal permite Generar actividad directamente desde su lista, con labor, horario, asistentes disponibles, encargado y función individual. Los escoltas reservados quedan excluidos de servicios y actividades de Personal, tanto en la interfaz como en la validación del servidor y la escritura atómica. En Escoltas se conservan sus acompañamientos propios, ausencias, carga y descanso. La tarjeta de Escoltas conserva el desglose E-SECURITY sin SK.
 
-El servidor verifica el grupo al validar y al escribir servicios y actividades, incluso ante cambios simultáneos desde otro dispositivo. La asignación no crea horas trabajadas: se mantienen los servicios reales, permisos aplicables al cargo, vacaciones, incapacidades y controles de carga y descanso. Agregar Administrativo no requiere migración ni altera fichas, credenciales o historial.
-
-### Registro común y conductores
-
-Todos los administradores consultan los mismos grupos (Gerencia, Seguridad, Administrativo y Alimentos) y usan un único botón Registrar funcionario. El cargo Conductor se agrupa en Alimentos, conserva permisos y regreso previsto, y se muestra como Asignado a conducción cuando no tiene una novedad activa. No integra los disponibles ni puede asignarse a servicios o actividades de servicio; la validación se repite en la escritura del servidor. Compartir grupo con cocina no concede acceso al portal de preparación de alimentos. Los registros existentes solo cambian de cargo cuando un administrador los edita.
+Administrativo conserva su grupo y disponibilidad propios. Alimentos reúne cocina y conductores. Los conductores no se cuentan disponibles para servicios y conservan permisos e historial. Todos los administradores usan el mismo botón Registrar funcionario. No se requiere migración de base de datos.
 
 ### Excepción de permisos por cargo
 

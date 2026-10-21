@@ -137,48 +137,48 @@ console.log('PASS manual incapacity detail: required, persisted, updated, exclud
 
 // Permanent assignment belongs to the profile, independently of the professional role.
 const groups=load('lib/service-groups.ts'),work=load('lib/workload.ts'),dashboardGroups=load('lib/dashboard.ts');
-assert.equal(groups.serviceGroup({role:'Escolta'}),'Seguridad');
+assert.equal(groups.serviceGroup({role:'Escolta'}),'Escoltas');
 assert.equal(groups.serviceGroup({role:'Preparación de alimentos'}),'Alimentos');
-const escort={...person,id:'management-escort-one',document:'gerencia-001',role:'Escolta',serviceGroup:'Gerencia',status:'Disponible'};
+const escort={...person,id:'management-escort-one',document:'gerencia-001',role:'Escolta',serviceGroup:'Escoltas',status:'Disponible'};
 assert.equal((await call(admin,{type:'person',record:escort})).status,200);
 assert.equal((await call(admin,{type:'person',record:{...escort,serviceGroup:'Otro'}})).status,400);
-let assigned=(await call(admin,null)).data.people.find(p=>p.id===escort.id);assert.equal(assigned.role,'Escolta');assert.equal(assigned.serviceGroup,'Gerencia');
+let assigned=(await call(admin,null)).data.people.find(p=>p.id===escort.id);assert.equal(assigned.role,'Escolta');assert.equal(assigned.serviceGroup,'Escoltas');
 assert.equal(work.workload(assigned,[],undefined,clock).canAssignMine,false);assert.equal(work.workload(assigned,[],undefined,clock).hours24,0);
-const groupData={people:[assigned,{...assigned,id:'mine-person',serviceGroup:'Seguridad'},{...assigned,id:'food-person',role:'Preparación de alimentos',serviceGroup:''}],events:[]};
-for(const [group,id] of [['Gerencia',escort.id],['Seguridad','mine-person'],['Alimentos','food-person']]){const summary=dashboardGroups.dashboardSummary(groupData,group,clock);assert.equal(summary.people.length,1);assert.equal(summary.ready[0].person.id,id);}
+const groupData={people:[assigned,{...assigned,id:'mine-person',serviceGroup:'Personal'},{...assigned,id:'food-person',role:'Preparación de alimentos',serviceGroup:''}],events:[]};
+for(const [group,id] of [['Escoltas',escort.id],['Personal','mine-person'],['Alimentos','food-person']]){const summary=dashboardGroups.dashboardSummary(groupData,group,clock);assert.equal(summary.people.length,1);assert.equal(summary.ready[0].person.id,id);}
 const noGroup={...escort};delete noGroup.serviceGroup;assert.equal((await call(admin,{type:'person',record:{...noGroup,phone:'3100000000'}})).status,200);
-assert.equal((await call(admin,null)).data.people.find(p=>p.id===escort.id).serviceGroup,'Gerencia');
-const managedEvent={id:'management-service-one',personId:escort.id,kind:'Servicio',start:'2027-01-05T08:00:00-05:00',end:'2027-01-05T12:00:00-05:00',place:'Acompañamiento del gerente a mina',serviceGroup:'Gerencia'};
-for(const scope of ['', 'Seguridad','Alimentos']){const result=await call(admin,{type:'event',record:{...managedEvent,serviceGroup:scope}});assert.equal(result.status,400);assert.ok(result.data.error);}
-assert.equal((await call(admin,{type:'event',record:managedEvent})).status,200);assert.equal(sql.prepare('SELECT service_group FROM events WHERE id=?').get(managedEvent.id).service_group,'Gerencia');
+assert.equal((await call(admin,null)).data.people.find(p=>p.id===escort.id).serviceGroup,'Escoltas');
+const managedEvent={id:'management-service-one',personId:escort.id,kind:'Servicio',start:'2027-01-05T08:00:00-05:00',end:'2027-01-05T12:00:00-05:00',place:'Acompañamiento del gerente a mina',serviceGroup:'Escoltas'};
+for(const scope of ['', 'Personal','Alimentos']){const result=await call(admin,{type:'event',record:{...managedEvent,serviceGroup:scope}});assert.equal(result.status,400);assert.ok(result.data.error);}
+assert.equal((await call(admin,{type:'event',record:managedEvent})).status,200);assert.equal(sql.prepare('SELECT service_group FROM events WHERE id=?').get(managedEvent.id).service_group,'Escoltas');
 const activityRules=load('lib/activities.ts');
 assert.equal(activityRules.activityAvailability(assigned,{people:[assigned],events:[]},managedEvent.start,managedEvent.end).available,false);
-assert.equal(activityRules.activityAvailability(assigned,{people:[assigned],events:[]},managedEvent.start,managedEvent.end,'','Gerencia').available,true);
-const managedActivity={id:'management-activity-one',name:'Acompañamiento de gerencia',serviceGroup:'Gerencia',start:'2027-01-07T08:00:00-05:00',end:'2027-01-07T12:00:00-05:00',coordinatorId:escort.id,participants:[{personId:escort.id,function:'Escolta'}]};
+assert.equal(activityRules.activityAvailability(assigned,{people:[assigned],events:[]},managedEvent.start,managedEvent.end,'','Escoltas').available,true);
+const managedActivity={id:'management-activity-one',name:'Acompañamiento de gerencia',serviceGroup:'Escoltas',start:'2027-01-07T08:00:00-05:00',end:'2027-01-07T12:00:00-05:00',coordinatorId:escort.id,participants:[{personId:escort.id,function:'Escolta'}]};
 assert.equal((await call(admin,{type:'activity',record:{...managedActivity,serviceGroup:''}})).status,400);
 assert.equal((await call(admin,{type:'activity',record:managedActivity})).status,200);
-assert.equal(sql.prepare('SELECT service_group FROM activities WHERE id=?').get(managedActivity.id).service_group,'Gerencia');
-assert.equal(sql.prepare('SELECT service_group FROM events WHERE activity_id=?').get(managedActivity.id).service_group,'Gerencia');
-assert.equal((await call(admin,null)).data.activities.find(a=>a.id===managedActivity.id).serviceGroup,'Gerencia');
-assert.equal(groups.serviceGroup((await call(admin,null)).data.people.find(p=>p.id===escort.id)),'Gerencia');
+assert.equal(sql.prepare('SELECT service_group FROM activities WHERE id=?').get(managedActivity.id).service_group,'Escoltas');
+assert.equal(sql.prepare('SELECT service_group FROM events WHERE activity_id=?').get(managedActivity.id).service_group,'Escoltas');
+assert.equal((await call(admin,null)).data.activities.find(a=>a.id===managedActivity.id).serviceGroup,'Escoltas');
+assert.equal(groups.serviceGroup((await call(admin,null)).data.people.find(p=>p.id===escort.id)),'Escoltas');
 // An explicit transfer retains the role, historical services and the audited before/after groups.
-assert.equal((await call(admin,{type:'person',operationId:'transfer-escort-one',record:{...escort,serviceGroup:'Seguridad'}})).status,200);
-const transfer=sql.prepare('SELECT changes FROM audit_logs WHERE operation_id=?').get('transfer-escort-one');assert.ok(JSON.parse(transfer.changes).some(c=>c.field==='serviceGroup'&&c.before==='Gerencia'&&c.after==='Seguridad'));
+assert.equal((await call(admin,{type:'person',operationId:'transfer-escort-one',record:{...escort,serviceGroup:'Personal'}})).status,200);
+const transfer=sql.prepare('SELECT changes FROM audit_logs WHERE operation_id=?').get('transfer-escort-one');assert.ok(JSON.parse(transfer.changes).some(c=>c.field==='serviceGroup'&&c.before==='Escoltas'&&c.after==='Personal'));
 assert.equal(sql.prepare('SELECT role FROM people WHERE id=?').get(escort.id).role,'Escolta');
-assert.equal(sql.prepare('SELECT service_group FROM events WHERE id=?').get(managedEvent.id).service_group,'Gerencia');
-assert.equal((await call(admin,{type:'event',record:{...managedEvent,id:'mine-after-transfer',start:'2027-01-10T08:00:00-05:00',end:'2027-01-10T12:00:00-05:00',serviceGroup:'Seguridad',place:'Servicio habitual de mina'}})).status,200);
+assert.equal(sql.prepare('SELECT service_group FROM events WHERE id=?').get(managedEvent.id).service_group,'Escoltas');
+assert.equal((await call(admin,{type:'event',record:{...managedEvent,id:'mine-after-transfer',start:'2027-01-10T08:00:00-05:00',end:'2027-01-10T12:00:00-05:00',serviceGroup:'Personal',place:'Servicio habitual de mina'}})).status,200);
 // Recheck assignment inside the write, in case another device transfers the person after validation.
-await assert.rejects(()=>server.saveEvent({...managedEvent,id:'transfer-race-service',serviceGroup:'Seguridad',start:'2027-01-12T08:00:00-05:00',end:'2027-01-12T12:00:00-05:00'},undefined,async statement=>{sql.prepare("UPDATE people SET service_group='Gerencia' WHERE id=?").run(escort.id);return statement.run()}),/grupo asignado/);
+await assert.rejects(()=>server.saveEvent({...managedEvent,id:'transfer-race-service',serviceGroup:'Personal',start:'2027-01-12T08:00:00-05:00',end:'2027-01-12T12:00:00-05:00'},undefined,async statement=>{sql.prepare("UPDATE people SET service_group='Escoltas' WHERE id=?").run(escort.id);return statement.run()}),/grupo asignado/);
 assert.equal(sql.prepare('SELECT id FROM events WHERE id=?').get('transfer-race-service'),undefined);
 // Management still obeys leave/illness/rest rules and the existing meal/report permissions.
-for(const status of ['Incapacitado','De permiso','De vacaciones','Inactivo'])assert.equal(activityRules.activityAvailability({...assigned,status},{people:[],events:[]},managedEvent.start,managedEvent.end,'','Gerencia').available,false);
+for(const status of ['Incapacitado','De permiso','De vacaciones','Inactivo'])assert.equal(activityRules.activityAvailability({...assigned,status},{people:[],events:[]},managedEvent.start,managedEvent.end,'','Escoltas').available,false);
 const absence={...managedEvent,id:'management-leave-one',kind:'Permiso',start:'2027-01-15T00:00:00-05:00',end:'2027-01-17T00:00:00-05:00',place:'Descanso'};
 assert.equal((await call(admin,{type:'event',record:absence})).status,200);
 assert.equal((await call(admin,{type:'event',record:{...managedEvent,id:'management-overlap-one',start:'2027-01-15T08:00:00-05:00',end:'2027-01-15T12:00:00-05:00'}})).status,400);
 console.log('PASS service groups: separate pools, same job role, no invented hours, legacy preservation, management-only services and activities, atomic transfer race, audit and absences');
 
 // Drivers share the Alimentos view, but never enter the assignment pool or kitchen permissions.
-const driver={...person,id:'driver-person-one',document:'driver-001',role:'Conductor',status:'Disponible',serviceGroup:'Seguridad'};
+const driver={...person,id:'driver-person-one',document:'driver-001',role:'Conductor',status:'Disponible',serviceGroup:'Personal'};
 assert.equal((await call(admin,{type:'person',record:driver},newAdmin.data.token)).status,200);
 const storedDriver=(await call(admin,null,anotherAdmin.data.token)).data.people.find(p=>p.id===driver.id);
 assert.equal(storedDriver.serviceGroup,'Alimentos');assert.equal(groups.serviceGroup({role:'Conductor'}),'Alimentos');
@@ -211,7 +211,7 @@ console.log('PASS driver: shared admin visibility, Alimentos grouping, no availa
 const permissionPolicy=load('lib/permission-policy.ts'),returnRules=load('lib/absence-return.ts');
 const permissionDay=rules.addDays(rules.bogotaDate(),1);
 for(const [i,role] of permissionPolicy.PERMISSION_EXEMPT_ROLES.entries()){
- const boss={...person,id:'permission-exempt-'+i,document:'exempt-'+i,role:'Operador de seguridad',serviceGroup:'Seguridad',status:'Disponible'};
+ const boss={...person,id:'permission-exempt-'+i,document:'exempt-'+i,role:'Operador de seguridad',serviceGroup:'Personal',status:'Disponible'};
  assert.equal((await call(admin,{type:'person',record:boss})).status,200);
  const oldPermission={id:'exempt-legacy-leave-'+i,personId:boss.id,kind:'Permiso',start:permissionDay+'T00:00:00-05:00',end:rules.addDays(permissionDay,3)+'T00:00:00-05:00',place:'Registro anterior'};
  assert.equal((await call(admin,{type:'event',record:oldPermission})).status,200);
@@ -235,9 +235,9 @@ for(const [i,role] of permissionPolicy.PERMISSION_EXEMPT_ROLES.entries()){
  assert.equal((await call(self,{action:'meals',date:permissionDay,breakfast:true,lunch:false,dinner:false},access.data.token)).status,200);
  assert.ok((await call(kitchen,null)).data.rows.some(p=>p.id===boss.id));
  const oldClock=clock;clock=Date.parse(permissionDay+'T12:00:00-05:00');assert.equal((await call(kitchen,{action:'attendance',date:permissionDay,personId:boss.id,meal:'breakfast',received:true})).status,200);clock=oldClock;
- const service={id:'exempt-service-'+i,personId:boss.id,kind:'Servicio',serviceGroup:'Seguridad',start:permissionDay+'T08:00:00-05:00',end:permissionDay+'T10:00:00-05:00',place:'Servicio'};
+ const service={id:'exempt-service-'+i,personId:boss.id,kind:'Servicio',serviceGroup:'Personal',start:permissionDay+'T08:00:00-05:00',end:permissionDay+'T10:00:00-05:00',place:'Servicio'};
  assert.equal((await call(admin,{type:'event',record:service})).status,200);
- const newActivity={id:'exempt-activity-'+i,name:'Actividad',serviceGroup:'Seguridad',start:rules.addDays(permissionDay,1)+'T08:00:00-05:00',end:rules.addDays(permissionDay,1)+'T09:00:00-05:00',coordinatorId:boss.id,participants:[{personId:boss.id,function:'Coordinar'}]};
+ const newActivity={id:'exempt-activity-'+i,name:'Actividad',serviceGroup:'Personal',start:rules.addDays(permissionDay,1)+'T08:00:00-05:00',end:rules.addDays(permissionDay,1)+'T09:00:00-05:00',coordinatorId:boss.id,participants:[{personId:boss.id,function:'Coordinar'}]};
  assert.equal((await call(admin,{type:'activity',record:newActivity})).status,200);
  for(const [kind,date] of [['Vacaciones','2027-03-01'],['Incapacidad','2027-03-03']]){const absence={...oldPermission,id:'exempt-absence-'+i+'-'+kind,start:date+'T00:00:00-05:00',end:rules.addDays(date,1)+'T00:00:00-05:00',kind};assert.equal((await call(admin,{type:'event',record:absence})).status,200);assert.notEqual(work.workload(exempt,[absence],undefined,Date.parse(absence.start)).status,'Disponible');}
  assert.equal((await call(admin,null)).data.events.find(e=>e.id===oldPermission.id).place,'Registro anterior');
@@ -256,34 +256,34 @@ assert.equal(savedAdministrative.serviceGroup,'Administrativo');
 assert.equal(work.workload(savedAdministrative,[],undefined,clock).canAssignMine,false);
 const viewPeople=[
  {...savedAdministrative,name:'Ana SST'},
- {...savedAdministrative,id:'operator-view',name:'Ana Operador',role:'Operador de seguridad',serviceGroup:'Seguridad'},
- {...savedAdministrative,id:'escort-z-view',name:'Zoé Escolta',role:'Escolta',serviceGroup:'Gerencia'},
- {...savedAdministrative,id:'supervisor-view',name:'Ana Supervisor',role:'Supervisor',serviceGroup:'Seguridad'},
- {...savedAdministrative,id:'director-view',name:'Zeta Director',role:'Director de seguridad',serviceGroup:'Seguridad'},
- {...savedAdministrative,id:'chief-view',name:'Ana Jefe',role:'Jefe de seguridad',serviceGroup:'Seguridad'},
- {...savedAdministrative,id:'escort-a-view',name:'Álvaro Escolta',role:'Escolta',serviceGroup:'Seguridad'},
+ {...savedAdministrative,id:'operator-view',name:'Ana Operador',role:'Operador de seguridad',serviceGroup:'Personal'},
+ {...savedAdministrative,id:'escort-z-view',name:'Zoé Escolta',role:'Escolta',serviceGroup:'Escoltas'},
+ {...savedAdministrative,id:'supervisor-view',name:'Ana Supervisor',role:'Supervisor',serviceGroup:'Personal'},
+ {...savedAdministrative,id:'director-view',name:'Zeta Director',role:'Director de seguridad',serviceGroup:'Personal'},
+ {...savedAdministrative,id:'chief-view',name:'Ana Jefe',role:'Jefe de seguridad',serviceGroup:'Personal'},
+ {...savedAdministrative,id:'escort-a-view',name:'Álvaro Escolta',role:'Escolta',serviceGroup:'Personal'},
  {...storedDriver,name:'Conductor'},
  {...savedAdministrative,id:'cook-view',name:'Cocina',role:'Preparación de alimentos',serviceGroup:'Alimentos'}
 ];
 const viewBefore=JSON.stringify(viewPeople);
 for(let i=0;i<3;i++)for(const group of groups.SERVICE_GROUPS)groups.personnelForGroup(viewPeople,group);
 assert.equal(JSON.stringify(viewPeople),viewBefore);
-assert.deepEqual(Array.from(groups.personnelForGroup(viewPeople,'Seguridad'),p=>p.id),['director-view','chief-view','supervisor-view',administrative.id,'escort-a-view','escort-z-view','operator-view']);
+assert.deepEqual(Array.from(groups.personnelForGroup(viewPeople,'Personal'),p=>p.id),['director-view','chief-view','supervisor-view',administrative.id,'escort-a-view','escort-z-view','operator-view']);
 assert.deepEqual(Array.from(groups.personnelForGroup(viewPeople,'Administrativo'),p=>p.id),[administrative.id]);
-assert.deepEqual(Array.from(groups.personnelForGroup(viewPeople,'Gerencia'),p=>p.id),['escort-z-view']);
+assert.deepEqual(Array.from(groups.personnelForGroup(viewPeople,'Escoltas'),p=>p.id),['escort-z-view']);
 assert.equal(groups.personnelForGroup(viewPeople,'Alimentos').length,2);
 const viewData={people:viewPeople,events:[]};
-assert.equal(dashboardGroups.dashboardSummary(viewData,'Seguridad',clock).ready.length,5);
+assert.equal(dashboardGroups.dashboardSummary(viewData,'Personal',clock).ready.length,5);
 assert.equal(dashboardGroups.dashboardSummary(viewData,'Administrativo',clock).ready.length,1);
-assert.equal(dashboardGroups.dashboardSummary(viewData,'Gerencia',clock).byCompany.some(x=>x.company==='SK'),false);
-assert.equal(dashboardGroups.dashboardSummary(viewData,'Seguridad',clock).byCompany.some(x=>x.company==='SK'),true);
+assert.equal(dashboardGroups.dashboardSummary(viewData,'Escoltas',clock).byCompany.some(x=>x.company==='SK'),false);
+assert.equal(dashboardGroups.dashboardSummary(viewData,'Personal',clock).byCompany.some(x=>x.company==='SK'),true);
 const oldAdministrative={...administrative};delete oldAdministrative.serviceGroup;
 assert.equal((await call(admin,{type:'person',record:{...oldAdministrative,phone:'3100000020'}})).status,200);
 assert.equal((await call(admin,null)).data.people.find(p=>p.id===administrative.id).serviceGroup,'Administrativo');
 for(const token of ['admin-secret',newAdmin.data.token,anotherAdmin.data.token])assert.ok((await call(admin,null,token)).data.people.some(p=>p.id===administrative.id));
 const administrativeEvent={...managedEvent,id:'administrative-service',personId:administrative.id,serviceGroup:'Administrativo'};
 const administrativeActivity={...managedActivity,id:'administrative-activity',serviceGroup:'Administrativo',coordinatorId:administrative.id,participants:[{personId:administrative.id,function:'Apoyo administrativo'}]};
-for(const group of ['', 'Seguridad','Gerencia','Alimentos']){
+for(const group of ['', 'Personal','Escoltas','Alimentos']){
  assert.ok(groups.assignmentError(savedAdministrative,group));
  assert.equal((await call(admin,{type:'event',record:{...administrativeEvent,serviceGroup:group}})).status,400);
  assert.equal((await call(admin,{type:'activity',record:{...administrativeActivity,serviceGroup:group}})).status,400);
@@ -291,19 +291,19 @@ for(const group of ['', 'Seguridad','Gerencia','Alimentos']){
 assert.equal((await call(admin,{type:'event',record:administrativeEvent})).status,200);
 assert.equal((await call(admin,{type:'activity',record:administrativeActivity})).status,200);
 assert.equal(sql.prepare('SELECT service_group FROM events WHERE activity_id=?').get(administrativeActivity.id).service_group,'Administrativo');
-assert.equal((await call(admin,{type:'person',operationId:'transfer-administrative',record:{...administrative,serviceGroup:'Seguridad'}})).status,200);
-assert.ok(JSON.parse(sql.prepare('SELECT changes FROM audit_logs WHERE operation_id=?').get('transfer-administrative').changes).some(c=>c.field==='serviceGroup'&&c.before==='Administrativo'&&c.after==='Seguridad'));
+assert.equal((await call(admin,{type:'person',operationId:'transfer-administrative',record:{...administrative,serviceGroup:'Personal'}})).status,200);
+assert.ok(JSON.parse(sql.prepare('SELECT changes FROM audit_logs WHERE operation_id=?').get('transfer-administrative').changes).some(c=>c.field==='serviceGroup'&&c.before==='Administrativo'&&c.after==='Personal'));
 assert.equal(sql.prepare('SELECT service_group FROM events WHERE id=?').get(administrativeEvent.id).service_group,'Administrativo');
-for(const group of ['', 'Seguridad']){
- sql.prepare("UPDATE people SET service_group='Seguridad' WHERE id=?").run(administrative.id);
+for(const group of ['', 'Personal']){
+ sql.prepare("UPDATE people SET service_group='Personal' WHERE id=?").run(administrative.id);
  const id='administrative-race-'+(group||'legacy');
  await assert.rejects(()=>server.saveEvent({...administrativeEvent,id,serviceGroup:group,start:'2027-06-01T08:00:00-05:00',end:'2027-06-01T12:00:00-05:00'},undefined,async statement=>{sql.prepare("UPDATE people SET service_group='Administrativo' WHERE id=?").run(administrative.id);return statement.run()}),/grupo asignado/);
  assert.equal(sql.prepare('SELECT id FROM events WHERE id=?').get(id),undefined);
 }
 // A transfer after activity validation also rejects the entire assignment, including legacy clients.
 const batchBeforeAdministrative=DB.batch;
-for(const group of ['', 'Seguridad']){
- sql.prepare("UPDATE people SET service_group='Seguridad' WHERE id=?").run(administrative.id);
+for(const group of ['', 'Personal']){
+ sql.prepare("UPDATE people SET service_group='Personal' WHERE id=?").run(administrative.id);
  const id='administrative-activity-race-'+(group||'legacy');
  DB.batch=async statements=>{sql.prepare("UPDATE people SET service_group='Administrativo' WHERE id=?").run(administrative.id);return batchBeforeAdministrative(statements)};
  try{assert.equal((await call(admin,{type:'activity',record:{...administrativeActivity,id,serviceGroup:group,start:'2027-06-03T08:00:00-05:00',end:'2027-06-03T12:00:00-05:00'}})).status,400)}finally{DB.batch=batchBeforeAdministrative;}
@@ -311,6 +311,42 @@ for(const group of ['', 'Seguridad']){
  assert.equal(sql.prepare('SELECT count(*) AS n FROM events WHERE activity_id=?').get(id).n,0);
 }
 console.log('PASS four groups: broad Security view, role/name order, immutable tab queries, exact group cards, no SK in Gerencia card, persisted Administrative assignment, legacy safety, shared admin access, audited transfers, atomic service/activity races');
+
+// Existing Gerencia escorts and director escorts stored as Seguridad are both reserved.
+const directorEscort={...person,id:'director-escort-legacy',document:'director-escort-001',role:'Escolta',status:'Disponible',serviceGroup:'Escoltas'};
+assert.equal((await call(admin,{type:'person',record:directorEscort})).status,200);
+sql.prepare("UPDATE people SET service_group='Seguridad' WHERE id=?").run(directorEscort.id);
+const legacyDirector=(await call(admin,null)).data.people.find(p=>p.id===directorEscort.id);
+assert.equal(legacyDirector.serviceGroup,'Seguridad');
+assert.equal(groups.serviceGroup(legacyDirector),'Escoltas');
+assert.equal(groups.serviceGroup({...legacyDirector,serviceGroup:''}),'Escoltas');
+assert.equal(groups.serviceGroup({...person,role:'Supervisor',serviceGroup:'Seguridad'}),'Personal');
+assert.equal(groups.serviceGroup({...legacyDirector,serviceGroup:'Gerencia'}),'Escoltas');
+assert.equal(groups.validateServiceGroup('Seguridad'),'Personal');
+assert.equal(groups.validateServiceGroup('Gerencia'),'Escoltas');
+const legacyRoster={people:[legacyDirector,{...person,id:'legacy-general',name:'Personal disponible',serviceGroup:'Seguridad'},{...person,id:'legacy-management',name:'Escolta gerencia',role:'Escolta',serviceGroup:'Gerencia'}],events:[]};
+assert.equal(groups.personnelForGroup(legacyRoster.people,'Personal').length,3);
+assert.equal(groups.personnelForGroup(legacyRoster.people,'Escoltas').length,2);
+assert.equal(dashboardGroups.dashboardSummary(legacyRoster,'Personal',clock).available.length,1);
+assert.equal(dashboardGroups.dashboardSummary(legacyRoster,'Personal',clock).ready.length,1);
+for(const role of ['Conductor','Preparación de alimentos'])assert.equal(groups.personnelForGroup([{...person,name:role,role,serviceGroup:'Seguridad'}],'Personal').length,0);
+const legacyService={...managedEvent,id:'legacy-director-general',personId:legacyDirector.id,start:'2028-02-10T08:00:00-05:00',end:'2028-02-10T10:00:00-05:00'};
+for(const scope of ['', 'Seguridad','Personal'])assert.equal((await call(admin,{type:'event',record:{...legacyService,serviceGroup:scope}})).status,400);
+assert.equal((await call(admin,{type:'event',record:{...legacyService,serviceGroup:'Gerencia'}})).status,200);
+assert.equal(sql.prepare('SELECT service_group FROM events WHERE id=?').get(legacyService.id).service_group,'Escoltas');
+const legacyActivity={...managedActivity,id:'legacy-director-activity',start:'2028-02-12T08:00:00-05:00',end:'2028-02-12T10:00:00-05:00',coordinatorId:legacyDirector.id,participants:[{personId:legacyDirector.id,function:'Escolta del director'}]};
+for(const scope of ['', 'Seguridad','Personal'])assert.equal((await call(admin,{type:'activity',record:{...legacyActivity,serviceGroup:scope}})).status,400);
+assert.equal((await call(admin,{type:'activity',record:{...legacyActivity,serviceGroup:'Gerencia'}})).status,200);
+// Unrelated edits from older clients preserve assignment; explicit transfers still work.
+const legacyOmitted={...directorEscort,phone:'3000000000'};delete legacyOmitted.serviceGroup;
+assert.equal((await call(admin,{type:'person',record:legacyOmitted})).status,200);
+assert.equal(sql.prepare('SELECT service_group FROM people WHERE id=?').get(legacyDirector.id).service_group,'Seguridad');
+assert.equal((await call(admin,{type:'person',record:{...directorEscort,serviceGroup:'Seguridad'}})).status,200);
+assert.equal(sql.prepare('SELECT service_group FROM people WHERE id=?').get(legacyDirector.id).service_group,'Escoltas');
+assert.equal((await call(admin,{type:'person',record:{...directorEscort,serviceGroup:'Personal'}})).status,200);
+await assert.rejects(()=>server.saveEvent({...legacyService,id:'legacy-escort-race',serviceGroup:'Personal',start:'2028-02-15T08:00:00-05:00',end:'2028-02-15T10:00:00-05:00'},undefined,async statement=>{sql.prepare("UPDATE people SET service_group='Seguridad' WHERE id=?").run(legacyDirector.id);return statement.run()}),/grupo asignado/);
+assert.equal(sql.prepare('SELECT id FROM events WHERE id=?').get('legacy-escort-race'),undefined);
+console.log('PASS Personal/Escoltas: legacy Gerencia and director escorts reserved, exact available totals, kitchen/driver exclusions, old-client writes, dedicated assignments and atomic reservation guard');
 
 const down=await call(admin,{type:'invite',personId:'person-admin-123',accessRole:'Laboral'});const downgraded=await call(self,{action:'activate',document:'103',password:'laboral-person-password',invitation:down.data.url.split('#activate=')[1],accessRole:'Administrador'},'');assert.equal(downgraded.status,200);assert.equal(downgraded.data.accessRole,'Laboral');assert.equal((await call(admin,null,newAdmin.data.token)).status,401);assert.equal((await call(admin,null,downgraded.data.token)).status,401);
 await sql.exec("UPDATE people SET status='Inactivo' WHERE id='person-one-123'");assert.equal((await call(admin,null,anotherAdmin.data.token)).status,401);assert.equal((await call(adminAuth,{action:'login',username:'101',password:'second-admin-password'},'')).status,401);

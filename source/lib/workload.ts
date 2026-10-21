@@ -11,6 +11,6 @@ export function workload(person:Person,events:PersonnelEvent[],settings:WorkSett
  let status=effectiveBaseStatus(person)||'Disponible';if(status==='Descanso')status='En descanso';if(status!=='Inactivo'){if(active)status=active.kind==='Servicio'?'En servicio':active.kind==='Vacaciones'?'De vacaciones':active.kind==='Incapacidad'?'Incapacitado':'De permiso';else if(['Disponible','En descanso'].includes(status)&&lastEnd!==undefined)status=restRemaining>0?'En descanso':'Disponible';}
  if(person.role==='Conductor'&&status==='Disponible')status='Asignado a conducción';
  const overloaded=hours24>=settings.maxWorkHours24,needsRest=!inService&&restRemaining>0,alert=overloaded?'Sobrecarga':needsRest?'Descanso pendiente':'Sin alerta',canAssign=person.role!=='Conductor'&&status==='Disponible'&&!overloaded&&!needsRest;
- return{status,hours24,restHours,restRemaining,lastEnd,lastEndLabel:lastEnd===undefined?'Sin servicios anteriores':new Date(lastEnd).toISOString(),overloaded,needsRest,alert,canAssign,canAssignMine:canAssign&&serviceGroup(person)==='Seguridad',serviceGroup:serviceGroup(person)};
+ return{status,hours24,restHours,restRemaining,lastEnd,lastEndLabel:lastEnd===undefined?'Sin servicios anteriores':new Date(lastEnd).toISOString(),overloaded,needsRest,alert,canAssign,canAssignMine:canAssign&&serviceGroup(person)==='Personal',serviceGroup:serviceGroup(person)};
 }
 export const formatHours=(value:number)=>value.toLocaleString('es-CO',{maximumFractionDigits:1})+' h';

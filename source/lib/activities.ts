@@ -1,5 +1,5 @@
 import {controlsEvent} from './permission-policy';
-import {assignmentError,validateServiceGroup} from './service-groups';
+import {assignmentError,validateServiceGroup,groupName} from './service-groups';
 import type {Data,Person,PersonnelEvent} from './personnel';
 import {workload,DEFAULT_WORK_SETTINGS} from './workload';
 export type ActivityParticipant={personId:string;function:string;name?:string};
@@ -15,4 +15,4 @@ export function activityAvailability(person:Person,data:Data,start:string,end:st
 export function activityEvents(a:Activity):PersonnelEvent[]{return a.participants.map(p=>({id:'activity-'+a.id+'-'+p.personId,personId:p.personId,kind:'Servicio',start:a.start,end:a.end,place:a.name,notes:p.function,activityId:a.id,serviceGroup:a.serviceGroup||''}));}
 const parts=(value:string)=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value)).split(' ');
 export function activityLocal(value:string){const [date,time]=parts(value);return{date,time};}
-export function activityMessage(a:Activity,people:Person[]=[]){const person=(id:string,fallback?:string)=>people.find(p=>p.id===id)?.name||fallback||'Funcionario',from=activityLocal(a.start),to=activityLocal(a.end),day=(date:string)=>date.split('-').reverse().join('/');return ['ACTIVIDAD / LABOR',a.name,'Grupo de servicio: '+(a.serviceGroup||'General'),'','Fecha desde: '+day(from.date),'Fecha hasta: '+day(to.date),'Horario desde: '+from.time,'Horario hasta: '+to.time,'Hora de Colombia','','Encargado: '+person(a.coordinatorId,a.coordinatorName),'','ASISTENTES',...a.participants.map((p,i)=>`${i+1}. ${person(p.personId,p.name)}${p.function?' — Función: '+p.function:''}`)].join('\n');}
+export function activityMessage(a:Activity,people:Person[]=[]){const person=(id:string,fallback?:string)=>people.find(p=>p.id===id)?.name||fallback||'Funcionario',from=activityLocal(a.start),to=activityLocal(a.end),day=(date:string)=>date.split('-').reverse().join('/');return ['ACTIVIDAD / LABOR',a.name,'Grupo de servicio: '+(groupName(a.serviceGroup)||'General'),'','Fecha desde: '+day(from.date),'Fecha hasta: '+day(to.date),'Horario desde: '+from.time,'Horario hasta: '+to.time,'Hora de Colombia','','Encargado: '+person(a.coordinatorId,a.coordinatorName),'','ASISTENTES',...a.participants.map((p,i)=>`${i+1}. ${person(p.personId,p.name)}${p.function?' — Función: '+p.function:''}`)].join('\n');}

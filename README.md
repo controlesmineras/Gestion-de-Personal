@@ -4,17 +4,13 @@
 
 Producto independiente de SK-Web y Plaza Blending, con repositorio, backend y base D1 exclusivos. No utiliza el inicio de sesión de ChatGPT.
 
-## Tipo de ingreso
-
-Al abrir sin sesión ni preferencia guardada se elige ADMINISTRADOR o SEGURIDAD antes de ver documento/usuario y contraseña. El dispositivo recuerda esa elección y abre el formulario correspondiente en visitas posteriores; el selector permanece visible para cambiarla. Salir de la cuenta conserva la preferencia, pero no concede acceso sin las credenciales existentes. Una preferencia guardada tiene prioridad sobre sesiones del otro modo. Los enlaces de activación y de configuración siguen abriendo su flujo específico. La preferencia no cambia roles ni permisos; el rol interno Laboral se conserva por compatibilidad y se presenta como SEGURIDAD. Cocina mantiene su acceso por cargo.
-
 ## Administración
 
 Personal con documento, primer y segundo nombre, primer y segundo apellido, empresa, cargo, teléfono, disponibilidad, títulos y fortalezas individuales. Primer nombre, primer apellido y empresa son obligatorios. Empresa admite solo SK o E-SECURITY; cargo admite solo Director de seguridad, Jefe de seguridad, Supervisor, Escolta, Operador de seguridad y SST.
 
 Servicios con inicio/finalización y horas; permisos y vacaciones por fechas inclusivas; sanciones y llamados de atención con motivo y fechas; historial por funcionario. Los permisos superiores a diez días registran los días adicionales y quién los autorizó. Solo los servicios suman horas trabajadas.
 
-El acceso inicial del titular usa el usuario `admin`. Se permiten varios administradores, cada uno con su documento y contraseña. Al generar enlace se elige Administrador o SEGURIDAD; el rol se activa cuando el funcionario confirma su documento y crea su contraseña. Los nuevos administradores pueden entrar desde el ingreso general o desde Administración usando su documento. Los administradores pueden gestionar personal, registros y enlaces; los usuarios de SEGURIDAD solo sus propios registros. El titular elige su contraseña inicial desde el enlace privado de configuración, válido para crearla una sola vez. La contraseña se guarda con salt y PBKDF2; los accesos usan sesiones firmadas de 24 horas. Generar enlace en Personal crea un enlace de activación válido 24 horas y de un solo uso. Copiar enlace permite entregarlo al funcionario, quien confirma su documento y elige su contraseña (8 a 128 caracteres). Regenerar reemplaza el enlace anterior. Los accesos previos siguen funcionando hasta que se activa el nuevo enlace; la activación reemplaza la contraseña e invalida las sesiones anteriores. La contraseña no se muestra al administrador y se guarda con salt y PBKDF2. Los enlaces se almacenan solo como hash. Las claves personales anteriores se conservan hasta la activación.
+El acceso inicial del titular usa el usuario `admin`. Se permiten varios administradores, cada uno con su documento y contraseña. Al generar enlace se elige Administrador o Usuario laboral; el rol se activa cuando el funcionario confirma su documento y crea su contraseña. Los nuevos administradores pueden entrar desde el ingreso general o desde Administración usando su documento. Los administradores pueden gestionar personal, registros y enlaces; los usuarios laborales solo sus propios registros. El titular elige su contraseña inicial desde el enlace privado de configuración, válido para crearla una sola vez. La contraseña se guarda con salt y PBKDF2; los accesos usan sesiones firmadas de 24 horas. Generar enlace en Personal crea un enlace de activación válido 24 horas y de un solo uso. Copiar enlace permite entregarlo al funcionario, quien confirma su documento y elige su contraseña (8 a 128 caracteres). Regenerar reemplaza el enlace anterior. Los accesos previos siguen funcionando hasta que se activa el nuevo enlace; la activación reemplaza la contraseña e invalida las sesiones anteriores. La contraseña no se muestra al administrador y se guarda con salt y PBKDF2. Los enlaces se almacenan solo como hash. Las claves personales anteriores se conservan hasta la activación.
 
 ## Colaboradores y alimentos
 
@@ -38,7 +34,7 @@ Tocar una fila de Personal abre la ficha sencilla con nombre completo, documento
 
 Capacitaciones contiene Seguimiento del personal y Capacitaciones obligatorias. Administración agrega y edita requisitos para todo el personal. La vigencia en meses sugiere la fecha al registrar la obtención (12 meses = un año; 0 = sin vencimiento); la fecha real del certificado puede ajustarse. Los cambios de nombre conservan los certificados relacionados. Licencias de carro y moto siempre son obligatorias; sus categorías y vencimientos se registran según el documento.
 
-El seguimiento muestra Pendiente, Próxima a vencer (hasta 30 días), Vencida y Vigente; filtra por funcionario, requisito y estado y excluye inactivos. Pendiente incluye ausencia de certificado o de fecha de vigencia. Se conservan títulos anteriores y datos al actualizar desde clientes antiguos. Usuarios de SEGURIDAD consultan su propia ficha y requisitos sin editar ni ver fichas ajenas.
+El seguimiento muestra Pendiente, Próxima a vencer (hasta 30 días), Vencida y Vigente; filtra por funcionario, requisito y estado y excluye inactivos. Pendiente incluye ausencia de certificado o de fecha de vigencia. Se conservan títulos anteriores y datos al actualizar desde clientes antiguos. Usuarios laborales consultan su propia ficha y requisitos sin editar ni ver fichas ajenas.
 
 ## Carga y descanso
 
@@ -58,7 +54,7 @@ Historial de cambios muestra los últimos 500 cambios administrativos con fecha/
 
 ## Preparación de alimentos
 
-El cargo Preparación de alimentos tiene una pestaña administrativa aparte; al agregar desde esa pestaña se selecciona ese cargo. Se da acceso por enlace como a los demás usuarios de SEGURIDAD. Al ingresar, el personal con ese cargo ve cantidades de desayunos, almuerzos y comidas y los nombres completos de quienes los solicitaron por fecha, con actualización automática cada minuto. Conserva sus reportes personales. `/api/kitchen` comprueba la sesión y el cargo vigente; solo expone nombres, empresa y selección de alimentos, sin documentos, observaciones, contratos ni registros disciplinarios. Usuarios de SEGURIDAD de otros cargos no acceden a esa consulta.
+El cargo Preparación de alimentos tiene una pestaña administrativa aparte; al agregar desde esa pestaña se selecciona ese cargo. Se da acceso por enlace como a los demás usuarios laborales. Al ingresar, el personal con ese cargo ve cantidades de desayunos, almuerzos y comidas y los nombres completos de quienes los solicitaron por fecha, con actualización automática cada minuto. Conserva sus reportes personales. `/api/kitchen` comprueba la sesión y el cargo vigente; solo expone nombres, empresa y selección de alimentos, sin documentos, observaciones, contratos ni registros disciplinarios. Usuarios laborales de otros cargos no acceden a esa consulta.
 
 Permiso extraordinario por calamidad se puede seleccionar en Disponibilidad, conserva la restricción al asignar servicios y excluye al funcionario de los alimentos mientras tenga ese estado.
 
@@ -66,34 +62,25 @@ Las licencias de conducción de carro y moto no se exigen al cargo Preparación 
 
 Las pestañas del personal son SEGURIDAD y COCINA. Permisos y vacaciones se consultan, agregan y editan desde la ficha del funcionario; el formulario fija su identidad. Los filtros de disponibilidad siguen incluyendo De permiso y De vacaciones. Cada registro del historial destaca el administrador y su documento; la cuenta principal aparece como admin.
 
-Los administradores vinculados a un funcionario pueden usar ambos modos con la misma sesión: desde Administración, Mi acceso de SEGURIDAD abre sus reportes de alimentos, permisos y vacaciones; desde el portal de SEGURIDAD, Administración devuelve a la gestión. Ingresar o activar un enlace por documento abre primero el portal de SEGURIDAD. La cuenta principal admin no tiene ficha personal asociada: para reportar consumo o ausencias se necesita el acceso de un funcionario. Los reportes personales se vinculan en el servidor al dueño de la sesión, incluso si se envía otro documento o identificador.
+Los administradores vinculados a un funcionario pueden usar ambos modos con la misma sesión: desde Administración, Mi acceso laboral abre sus reportes de alimentos, permisos y vacaciones; desde el portal laboral, Administración devuelve a la gestión. Ingresar o activar un enlace por documento abre primero el portal laboral. La cuenta principal admin no tiene ficha personal asociada: para reportar consumo o ausencias se necesita el acceso de un funcionario. Los reportes personales se vinculan en el servidor al dueño de la sesión, incluso si se envía otro documento o identificador.
 
-El acceso de SEGURIDAD de Preparación de alimentos es exclusivo de cocina: abre las tres tarjetas DESAYUNO, ALMUERZO y COMIDA para mañana, con cantidades y listas de nombres completos al tocarlas. No muestra empresa, documentos ni fichas de los comensales, y no permite reportes personales desde ese acceso. La API de cocina omite empresa y la API personal devuelve solo la identidad mínima de ese acceso. Los administradores mantienen ambos modos y sus reportes propios.
+El acceso laboral de Preparación de alimentos es exclusivo de cocina: abre las tres tarjetas DESAYUNO, ALMUERZO y COMIDA para mañana, con cantidades y listas de nombres completos al tocarlas. No muestra empresa, documentos ni fichas de los comensales, y no permite reportes personales desde ese acceso. La API de cocina omite empresa y la API personal devuelve solo la identidad mínima de ese acceso. Los administradores mantienen ambos modos y sus reportes propios.
 
 Cocina también incluye Hoy · Entregas: cada alimento conserva su lista y permite marcar Recibido junto al nombre, desmarcar por corrección y filtrar Todos/Pendientes/Recibidos. Las marcas son compartidas, persistidas por funcionario, día y alimento, sin modificar la cantidad reportada. El servidor valida el cargo/sesión, que sea el día de entrega y que el funcionario haya solicitado ese alimento y no esté ausente. Guarda la identidad real de quien marcó y la fecha/hora. Mañana · Preparación mantiene la consulta de cantidades y nombres, sin marcar entregas futuras.
 
 ## Actividades y labores
 
-ACTIVIDADES permite Generar actividad con labor a realizar, fecha/hora inicial y final (un intervalo continuo, hora de Colombia), uno/varios/todos los disponibles, encargado entre los asistentes y función opcional por persona. Se puede filtrar asistentes por SEGURIDAD, COCINA o Todos y buscar por nombre/documento. Seleccionar todos los disponibles respeta el grupo y búsqueda actuales. Se revisan cruces con servicios, actividades, permisos y vacaciones, disponibilidad manual y alertas de carga/descanso previstas según la programación del horario seleccionado.
+ACTIVIDADES permite Generar actividad con labor a realizar, fecha/hora inicial y final (un intervalo continuo, hora de Colombia), uno/varios/todos los disponibles, encargado entre los asistentes y función opcional por persona. Se puede filtrar asistentes por grupo de servicio o Todos y buscar por nombre/documento. Seleccionar todos los disponibles respeta el grupo y búsqueda actuales. Se revisan cruces con servicios, actividades, permisos y vacaciones, disponibilidad manual y alertas de carga/descanso previstas según la programación del horario seleccionado.
 
-La actividad se guarda como un único registro con su lista de asistentes. Los servicios asociados reservan el horario de cada persona, se integran al cálculo ya existente de labor y descanso y no duplican la actividad grupal. La ficha de cada asistente muestra actividad, horario, encargado y su función. El acceso de SEGURIDAD consulta sus propias asignaciones y función; no recibe documentos ni fichas ajenas. El acceso exclusivo de cocina conserva su consulta de alimentos.
+La actividad se guarda como un único registro con su lista de asistentes. Los servicios asociados reservan el horario de cada persona, se integran al cálculo ya existente de labor y descanso y no duplican la actividad grupal. La ficha de cada asistente muestra actividad, horario, encargado y su función. El acceso laboral consulta sus propias asignaciones y función; no recibe documentos ni fichas ajenas. El acceso exclusivo de cocina conserva su consulta de alimentos.
 
 Editar la actividad actualiza todas las asignaciones en un lote atómico, sin permitir editar servicios vinculados por separado. Si aparece un cruce concurrente, no se guarda ninguna asignación parcial. Los cambios quedan en el historial con el administrador real y reintentos con identificador de operación no duplican asignaciones. Se conservan datos anteriores.
 
 Después de Generar actividad y desde cada tarjeta administrativa, Copiar mensaje presenta labor, fechas desde/hasta, horas desde/hasta, encargado, asistentes y funciones específicas. Copiar no envía mensajes. Las operaciones guardadas localmente muestran Pendiente de sincronizar hasta confirmar; la vista del mensaje advierte que debe confirmarse antes de comunicarla.
 
-
-## Regreso previsto de ausencias
-
-La lista de personal muestra debajo de la disponibilidad la fecha y hora de regreso previsto de los permisos y vacaciones vigentes. Los filtros De permiso y De vacaciones permiten consultarlo sin abrir fichas. El formato es DD/MM/AAAA, hh:mm a. m./p. m., siempre en hora de Colombia. El día final de una ausencia se incluye completo: si termina el 22/10/2026, el regreso previsto es el 23/10/2026 a las 12:00 a. m.
-
-La cuenta regresiva se actualiza con el reloj de la app. Ausencias consecutivas enlazadas muestran el regreso al concluir el conjunto. La ficha y el portal personal conservan cada periodo, su fecha y la indicación Periodo finalizado cuando corresponde. Se calcula una previsión, sin registrar una presentación efectiva ni borrar el historial. Si la disponibilidad se indicó manualmente sin un periodo fechado, muestra Regreso previsto: por registrar.
-
-
-
 ## Disponibilidad, novedades y documentos
 
-El dashboard cuenta al personal asignado al grupo seleccionado y desglosa SK y E-SECURITY, salvo Gerencia, cuya tarjeta omite SK. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
+El dashboard cuenta al personal asignado al grupo seleccionado y desglosa SK y E-SECURITY, salvo Escoltas, cuya tarjeta omite SK. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
 
 La ficha permite programar o registrar Permiso, Vacaciones e Incapacidad, con fechas inclusivas y sin restricción al día actual. La ausencia cambia el estado durante su intervalo y se verifica en los cruces de servicios, actividades y alimentos. El portal personal incluye estas novedades y su cola local.
 
@@ -101,23 +88,24 @@ Número de documento sigue siendo la identificación única. Cédula y licencias
 
 Los archivos cargados se guardan en R2 privado y se leen mediante sesión autenticada: administración o el titular de la ficha. Cocina no obtiene acceso a documentos ajenos. La base conserva las referencias y la migración 0012 añade documents_json sin borrar datos. Ediciones desde clientes anteriores conservan enlaces y adjuntos omitidos. Los enlaces externos conservan los permisos del proveedor donde se alojan.
 
-En Editar ficha, Disponibilidad / novedad permite elegir Permiso, Vacaciones o Incapacidad y exige Fecha de inicio y Fecha final (incluida), además del motivo o DETALLE. Guarda el período en el historial de novedades y la cola local existente; el estado se calcula durante esas fechas, sin dejar una ausencia manual permanente. Al editar una ausencia vigente se conserva su identificador. Se rechazan fechas invertidas y cruces; los permisos de más de diez días conservan su autorización adicional. Los datos básicos siguen protegidos por la autorización de otro administrador.
+Disponibilidad permite seleccionar Incapacidad y completar DETALLE (obligatorio). Se conserva en la ficha, la sincronización y la auditoría; no se borra al editar desde un cliente anterior. En las novedades fechadas de Incapacidad, el campo de motivo se presenta como DETALLE.
 
+## Tallas y autorización de datos básicos
 
-## Grupos de servicio: Gerencia, Seguridad, Administrativo y Alimentos
+La ficha registra TALLA CAMISA y TALLA PANTALÓN, opcionales y editables sin autorización adicional. Las versiones anteriores conservan los valores que no envían.
 
-Las cuatro pestañas son vistas de consulta: no modifican el cargo, estado ni grupo asignado. Seguridad muestra a todos excepto Conductor y Preparación de alimentos, incluidos los funcionarios de Gerencia y Administrativo. Ordena por Director de seguridad, Jefe de seguridad, Supervisor, SST, Escolta y Operador de seguridad, y alfabéticamente dentro de cada cargo. Gerencia y Administrativo muestran únicamente a quienes estén asignados a su grupo; Alimentos reúne cocina y conducción.
+En funcionarios existentes, solo el número de documento, nombres y apellidos permanecen bloqueados. Empresa, cargo y teléfono se editan normalmente. Otro administrador activo debe ingresar su documento/usuario y contraseña para autorizar la edición. El servidor comprueba nuevamente su sesión y que sea diferente del administrador que guarda; la corrección requiere conexión y no entra en la cola local. No se guardan las credenciales ni la sesión del autorizador en el dispositivo. El historial conserva quién modificó, quién autorizó y los valores anteriores y nuevos. La creación inicial de una ficha no requiere segunda autorización.
 
-Los contadores de personal, disponibilidad, servicios y horas mantienen el grupo asignado, independiente del listado general de Seguridad. Gerencia no muestra el desglose SK en su tarjeta. Los funcionarios de Gerencia y Administrativo aparecen identificados como reservados para su grupo, no como listos para servicios de Seguridad. Las actividades, servicios y capacitaciones conservan su consulta por grupo; alimentos e historial de cambios siguen siendo consultas globales.
+## Grupos de servicio: Personal, Escoltas, Administrativo y Alimentos
 
-El cargo y el grupo son campos independientes. Editar ficha > Grupo de servicio registra el traslado con su historial; cambiar de pestaña nunca lo hace. No se trasladan automáticamente registros existentes. Los registros sin grupo conservan Seguridad, salvo cocina y conducción, que se agrupan en Alimentos. Los clientes anteriores no pueden borrar un grupo omitido al editar otra información ni asignar personal de Gerencia o Administrativo a servicios generales.
+Seguridad se llama Personal y Gerencia se llama Escoltas. Personal muestra a todos excepto Conductor y Preparación de alimentos, ordenados por cargo y nombre. Incluye a los reservados para Escoltas y Administrativo, identificados como tales; el total de personal refleja esta lista. Los contadores Disponibles y Listos para asignar y el filtro Disponible incluyen únicamente el grupo Personal. Cambiar de pestaña no modifica fichas ni asignaciones.
 
-El servidor verifica el grupo al validar y al escribir servicios y actividades, incluso ante cambios simultáneos desde otro dispositivo. La asignación no crea horas trabajadas: se mantienen los servicios reales, permisos aplicables al cargo, vacaciones, incapacidades y controles de carga y descanso. Agregar Administrativo no requiere migración ni altera fichas, credenciales o historial.
+Escoltas reúne las asignaciones anteriores a Gerencia y a quienes tienen cargo Escolta con el grupo anterior Seguridad o sin grupo. Esto incluye a los escoltas del director de Seguridad. No se reescriben fichas ni servicios históricos: la compatibilidad se aplica al leer y validar. Un traslado explícito posterior al nuevo grupo Personal sigue siendo posible desde Editar ficha > Grupo de servicio y queda auditado. Los nuevos escoltas proponen Escoltas como grupo; cargo y grupo siguen siendo campos distintos. Clientes anteriores no pueden asignar estos escoltas a servicios generales mediante los nombres antiguos.
 
-### Conductores y registro común
+Personal permite Generar actividad directamente desde su lista, con labor, horario, asistentes disponibles, encargado y función individual. Los escoltas reservados quedan excluidos de servicios y actividades de Personal, tanto en la interfaz como en la validación del servidor y la escritura atómica. En Escoltas se conservan sus acompañamientos propios, ausencias, carga y descanso. La tarjeta de Escoltas conserva el desglose E-SECURITY sin SK.
 
-Todos los administradores ven Gerencia, Seguridad, Administrativo y Alimentos y usan el mismo botón Registrar funcionario. El cargo Conductor se organiza en Alimentos, sin disponibilidad para servicios, y conserva permisos, historial y regreso previsto. El servidor aplica la misma restricción al guardar asignaciones.
+Administrativo conserva su grupo y disponibilidad propios. Alimentos reúne cocina y conductores. Los conductores no se cuentan disponibles para servicios y conservan permisos e historial. Todos los administradores usan el mismo botón Registrar funcionario. No se requiere migración de base de datos.
 
-### Excepción de permisos
+### Excepción de permisos por cargo
 
-Director de seguridad, Jefe de seguridad y Supervisor no llevan control de sus propios permisos. Se conserva el historial anterior, sin conteos ni alertas por permiso. Vacaciones, incapacidades y facultades administrativas sobre el resto del personal conservan su funcionamiento.
+Director de seguridad, Jefe de seguridad y Supervisor no llevan control de sus propios permisos: no hay registro nuevo, edición, conteo ni avisos de regreso por permiso. Los registros anteriores siguen disponibles como historial y no afectan la disponibilidad ni los alimentos. Vacaciones e incapacidades conservan sus reglas. La excepción se comprueba con el cargo del funcionario en el servidor, también al escribir, y no concede ni retira acceso de administrador. Los administradores de esos cargos pueden gestionar los permisos del resto del personal.
