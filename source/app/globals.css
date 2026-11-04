@@ -159,3 +159,5 @@ body {
 .meal-locations label:has(input:checked){border-color:#214f6c;background:#e5eff5}
 .meal-locations input{width:18px;height:18px;margin:0;accent-color:#214f6c}
 .meal-destination{display:block;margin-top:4px;color:#31536a;font-size:.8em}
+
+.meal-locations label:has(input:disabled){opacity:.55;cursor:not-allowed}
