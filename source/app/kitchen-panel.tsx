@@ -5,8 +5,9 @@ import {ShieldCheck,LogOut} from 'lucide-react';
 import {Dialog,DialogContent,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import {addDays,bogotaDate,dateTime} from '@/lib/personnel';
 import {MEAL_OPTIONS,isMealLocation,mealLocationKey,type MealKey,type MealLocation} from '@/lib/meals';
+import {MealReportTimes} from './meal-report-times';
 const API='https://gestion-de-personal.nelsoncaste86.chatgpt.site/api/kitchen';
-type KitchenRow = {id:string;name:string} & Record<MealKey,number>
+type KitchenRow = {id:string;name:string} & MealReportTimes & Record<MealKey,number>
  & Partial<Record<ReturnType<typeof mealLocationKey>,MealLocation|null>>;
 
 function destination(row:KitchenRow,key:MealKey){
@@ -43,7 +44,7 @@ export default function KitchenPanel({token}:{token:string}){
  </button>;
 })}</div>{current&&<small>Actualizado: {dateTime(current.updatedAt)}</small>}<Dialog open={!!selected} onOpenChange={open=>{if(!open&&!saving)setSelected('')}}><DialogContent><DialogTitle>{MEAL_OPTIONS.find(([key])=>key===selected)?.[1]}</DialogTitle><DialogDescription>{date.split('-').reverse().join('/')}</DialogDescription>{isToday&&<><p className="delivery-totals">{done} recibidos · {names.length-done} pendientes</p><label>Mostrar<select disabled={!!saving} value={filter} onChange={e=>setFilter(e.target.value)}>{['Todos','Pendientes','Recibidos'].map(f=><option key={f}>{f}</option>)}</select></label></>}{error&&<p className="notice" role="alert">{error}</p>}{selected&&shown.length?<ul className="kitchen-names">{shown.map(p=>{
  const place=destination(p,selected);
- const diner=<span>{p.name}<small className="meal-destination">{place==='Mina'?'Mina · Enviar':place}</small></span>;
+ const diner=<span>{p.name}<small className="meal-destination">{place==='Mina'?'Mina · Enviar':place}</small><MealReportTimes {...p}/></span>;
  return <li key={p.id}>{isToday?<label className={'delivery-check '+(received(p.id,selected)?'delivered':'')}>
   <input type="checkbox" checked={received(p.id,selected)} disabled={!!saving} aria-label={'Recibió el alimento: '+p.name+' · '+place} onChange={e=>void mark(p.id,e.target.checked)}/>
   {diner}{saving===p.id&&<small>Guardando…</small>}
