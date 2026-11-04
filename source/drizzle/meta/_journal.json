@@ -113,6 +113,20 @@
       "when": 1792527718386,
       "tag": "0015_damp_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1792599371287,
+      "tag": "0016_mysterious_wiccan",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1793800834204,
+      "tag": "0017_brave_hannibal_king",
+      "breakpoints": true
     }
   ]
 }
