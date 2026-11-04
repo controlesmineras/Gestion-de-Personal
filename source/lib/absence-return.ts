@@ -1,7 +1,7 @@
 import {controlsEvent,effectiveBaseStatus} from './permission-policy';
 import type {Person,PersonnelEvent} from './personnel';
 const DAY=86400000,MINUTE=60000;
-export const isAbsence=(event:PersonnelEvent)=>['Permiso','Vacaciones','Incapacidad'].includes(event.kind);
+export const isAbsence=(event:PersonnelEvent)=>['Permiso','Permiso especial','Vacaciones','Incapacidad'].includes(event.kind);
 export const hasAbsenceStatus=(person:Person)=>['De permiso','De vacaciones','Incapacitado','Permiso extraordinario por calamidad'].includes(effectiveBaseStatus(person)||'');
 export function returnDateTime(iso:string,clock24=false):string{
  const time=Date.parse(iso);if(!Number.isFinite(time))return 'Por registrar';

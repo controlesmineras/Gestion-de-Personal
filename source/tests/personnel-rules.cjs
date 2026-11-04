@@ -259,9 +259,56 @@ for(const [i,role] of permissionPolicy.PERMISSION_EXEMPT_ROLES.entries()){
 }
 const raceBoss={...person,id:'permission-race-person',document:'permission-race-doc',role:'Operador de seguridad',status:'Disponible'};
 assert.equal((await call(admin,{type:'person',record:raceBoss})).status,200);
-await assert.rejects(()=>server.saveEvent({...permit,id:'permission-role-race',personId:raceBoss.id},undefined,async statement=>{sql.prepare("UPDATE people SET role='Supervisor' WHERE id=?").run(raceBoss.id);return statement.run()}),/cargo/);
+await assert.rejects(()=>server.saveEvent({...permit,id:'permission-role-race',personId:raceBoss.id},undefined,async statement=>{sql.prepare("UPDATE people SET role='Jefe de seguridad' WHERE id=?").run(raceBoss.id);return statement.run()}),/cargo/);
 assert.equal(sql.prepare('SELECT id FROM events WHERE id=?').get('permission-role-race'),undefined);
-console.log('PASS three exempt roles: server/admin/self validation, atomic role race, preserved history, no permission availability/countdown/meal blocks, vacation/incapacity unchanged and full admin powers over other employees');
+console.log('PASS two exempt roles: server/admin/self validation, atomic role race, preserved history, no permission availability/countdown/meal blocks, vacation/incapacity unchanged and full admin powers over other employees');
+
+const supervisor={...person,id:'permission-supervisor',document:'permission-supervisor-doc',role:'Supervisor',status:'Disponible'};
+assert.equal((await call(admin,{type:'person',record:supervisor})).status,200);
+const supervisorInvite=await call(admin,{type:'invite',personId:supervisor.id,accessRole:'Laboral'});
+const supervisorAccess=await call(self,{action:'activate',document:supervisor.document,password:'supervisor-test-password',invitation:supervisorInvite.data.url.split('#activate=')[1]},'');
+assert.equal(supervisorAccess.status,200);
+assert.equal((await call(self,{action:'permission',record:{...permit,id:'supervisor-own-permission',personId:supervisor.id}},supervisorAccess.data.token)).status,200);
+
+const tomorrow=rules.addDays(rules.bogotaDate(),1);
+const vacationStart=rules.addDays(tomorrow,1);
+const futureVacation={id:'supervisor-future-vacation',personId:supervisor.id,kind:'Vacaciones',start:vacationStart+'T00:00:00-05:00',end:rules.addDays(vacationStart,1)+'T00:00:00-05:00',place:'Vacaciones'};
+assert.equal(rules.mealBlocked(supervisor,[futureVacation],tomorrow),false);
+assert.equal(rules.mealBlocked(supervisor,[futureVacation],vacationStart),true);
+assert.equal((await call(self,{action:'vacation',record:futureVacation},supervisorAccess.data.token)).status,200);
+assert.equal((await call(self,{action:'meals',date:tomorrow,breakfast:true,lunch:false,dinner:false,breakfastLocation:'Casa'},supervisorAccess.data.token)).status,200);
+
+assert.equal((await call(self,{action:'vacation',record:futureVacation},supervisorAccess.data.token)).status,200);
+const movedDay='2030-01-01';
+const movedVacation={...futureVacation,start:movedDay+'T00:00:00-05:00',end:rules.addDays(movedDay,1)+'T00:00:00-05:00'};
+const rejectedEdit=await call(self,{action:'vacation',record:movedVacation},supervisorAccess.data.token);
+assert.equal(rejectedEdit.status,400);
+const adminEdit=await call(admin,{type:'event',record:movedVacation});
+assert.equal(adminEdit.status,200,JSON.stringify(adminEdit.data));
+const editedVacation=(await call(self,null,supervisorAccess.data.token)).data.events.find(event=>event.id===futureVacation.id);
+assert.equal(editedVacation.start,new Date(movedVacation.start).toISOString());
+
+const special={...futureVacation,id:'supervisor-special-permission',start:tomorrow+'T00:00:00-05:00',end:vacationStart+'T00:00:00-05:00'};
+assert.equal((await call(self,{action:'specialPermission',record:special},supervisorAccess.data.token)).status,400);
+assert.equal((await call(self,{action:'specialPermission',record:{...special,authorizedBy:'Jefe de turno'}},supervisorAccess.data.token)).status,200);
+const savedSpecial=(await call(self,null,supervisorAccess.data.token)).data.events.find(e=>e.id===special.id);
+assert.equal(savedSpecial.kind,'Permiso especial');
+assert.equal(savedSpecial.authorizedBy,'Jefe de turno');
+assert.equal((await call(self,{action:'meals',date:tomorrow,breakfast:true,lunch:false,dinner:false},supervisorAccess.data.token)).status,409);
+
+const deleteSpecial={type:'deleteAbsence',id:savedSpecial.id,start:savedSpecial.start,end:savedSpecial.end};
+assert.equal((await call(admin,deleteSpecial,supervisorAccess.data.token)).status,401);
+assert.equal((await call(admin,deleteSpecial)).status,200);
+const erroneousVacation={...futureVacation,start:tomorrow+'T00:00:00-05:00',end:vacationStart+'T00:00:00-05:00'};
+assert.equal((await call(admin,{type:'event',record:erroneousVacation})).status,200);
+assert.equal((await call(self,{action:'meals',date:tomorrow,breakfast:true,lunch:false,dinner:false},supervisorAccess.data.token)).status,409);
+const deletion={type:'deleteAbsence',id:futureVacation.id,start:new Date(erroneousVacation.start).toISOString(),end:new Date(erroneousVacation.end).toISOString(),operationId:'delete-erroneous-vacation'};
+assert.equal((await call(admin,{...deletion,start:editedVacation.start})).status,409);
+assert.equal((await call(admin,deletion)).status,200);
+assert.equal((await call(admin,deletion)).status,200);
+assert.equal(sql.prepare('SELECT action FROM audit_logs WHERE operation_id=?').get(deletion.operationId).action,'Eliminación');
+assert.ok(!(await call(self,null,supervisorAccess.data.token)).data.events.some(event=>event.id===deletion.id));
+assert.equal((await call(self,{action:'meals',date:tomorrow,breakfast:true,lunch:false,dinner:false},supervisorAccess.data.token)).status,200);
 
 // Four views are pure queries; Security's broad list is independent from staffing pools.
 const administrative={...person,id:'administrative-person',document:'administrative-001',role:'SST',serviceGroup:'Administrativo',status:'Disponible'};

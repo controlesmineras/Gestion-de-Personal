@@ -25,7 +25,7 @@ assert.throws(()=>prepareProfileAbsence(long,person,[]),/autoriz/);assert.equal(
 assert.equal(prepareProfileAbsence(person,person,[]).event,null);
 console.log('PASS: dates, inclusive periods, future/current/ended absences, three kinds, overlap rejection, editing IDs, offline replay and extended permissions');
 
-for(const role of ['Director de seguridad','Jefe de seguridad','Supervisor']){
+for(const role of ['Director de seguridad','Jefe de seguridad']){
  const exempt={...person,role,status:'De permiso'},old={id:'old-permission-123',personId:person.id,kind:'Permiso',start:'2026-10-21T05:00:00Z',end:'2026-10-22T05:00:00Z'};
  assert.equal(profileAbsenceDraft(exempt,[old],Date.parse(old.start)).status,'Disponible');
  assert.throws(()=>prepareProfileAbsence({...long,role,absenceEnd:'2026-10-05'},exempt,[]),/control de permisos/);

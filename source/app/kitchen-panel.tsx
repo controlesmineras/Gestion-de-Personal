@@ -35,13 +35,20 @@ export default function KitchenPanel({token}:{token:string}){
  const house=requested.filter(p=>destination(p,key)==='Casa').length;
  const mine=requested.filter(p=>destination(p,key)==='Mina').length;
  const unknown=requested.length-house-mine;
- const breakdown=`Casa: ${house} · Mina: ${mine}${unknown?` · Sin destino: ${unknown}`:''}`;
- return <button className="kitchen-meal" key={key} disabled={!current} onClick={()=>{setSelected(key);setFilter('Todos')}} aria-label={current?`${label}: ${requested.length} · ${breakdown} · Ver nombres`:`${label}: cargando`}>
-  <span>{label.toUpperCase()}</span><b>{current?requested.length:'—'}</b>
-  <small>{isToday?'Solicitados':'Por preparar'}</small>
-  {current&&<small>{breakdown}</small>}
+ return <article className="kitchen-meal" key={key}>
+  <span>{label.toUpperCase()}</span>
+  <small>Total</small>
+  <b>{current?requested.length:'—'}</b>
+  {current&&<div className="kitchen-destinations">
+   {house>0&&<div><strong>{house}</strong> en casa</div>}
+   {mine>0&&<div><strong>{mine}</strong> para enviar a mina</div>}
+   {unknown>0&&<div><strong>{unknown}</strong> sin destino</div>}
+  </div>}
   {isToday&&current&&<small>{served} recibidos · {requested.length-served} pendientes</small>}
- </button>;
+  <button className="secondary" disabled={!current} onClick={()=>{setSelected(key);setFilter('Todos')}} aria-label={'Ver funcionarios · '+label}>
+   Ver funcionarios
+  </button>
+ </article>;
 })}</div>{current&&<small>Actualizado: {dateTime(current.updatedAt)}</small>}<Dialog open={!!selected} onOpenChange={open=>{if(!open&&!saving)setSelected('')}}><DialogContent><DialogTitle>{MEAL_OPTIONS.find(([key])=>key===selected)?.[1]}</DialogTitle><DialogDescription>{date.split('-').reverse().join('/')}</DialogDescription>{isToday&&<><p className="delivery-totals">{done} recibidos · {names.length-done} pendientes</p><label>Mostrar<select disabled={!!saving} value={filter} onChange={e=>setFilter(e.target.value)}>{['Todos','Pendientes','Recibidos'].map(f=><option key={f}>{f}</option>)}</select></label></>}{error&&<p className="notice" role="alert">{error}</p>}{selected&&shown.length?<ul className="kitchen-names">{shown.map(p=>{
  const place=destination(p,selected);
  const diner=<span>{p.name}<small className="meal-destination">{place==='Mina'?'Mina · Enviar':place}</small><MealReportTimes {...p}/></span>;
