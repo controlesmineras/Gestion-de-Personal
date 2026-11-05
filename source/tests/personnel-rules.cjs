@@ -412,7 +412,22 @@ await assert.rejects(()=>server.saveEvent({...legacyService,id:'legacy-escort-ra
 assert.equal(sql.prepare('SELECT id FROM events WHERE id=?').get('legacy-escort-race'),undefined);
 console.log('PASS Personal/Escoltas: legacy Gerencia and director escorts reserved, exact available totals, kitchen/driver exclusions, old-client writes, dedicated assignments and atomic reservation guard');
 
-const down=await call(admin,{type:'invite',personId:'person-admin-123',accessRole:'Laboral'});const downgraded=await call(self,{action:'activate',document:'103',password:'laboral-person-password',invitation:down.data.url.split('#activate=')[1],accessRole:'Administrador'},'');assert.equal(downgraded.status,200);assert.equal(downgraded.data.accessRole,'Laboral');assert.equal((await call(admin,null,newAdmin.data.token)).status,401);assert.equal((await call(admin,null,downgraded.data.token)).status,401);
+const pendingAdminInvite=await call(admin,{type:'invite',personId:'person-admin-123',accessRole:'Administrador'});
+const demotion={type:'revokeAccess',personId:'person-admin-123',accessRole:'Administrador'};
+assert.equal((await call(admin,demotion,worker.data.token)).status,401);
+assert.equal((await call(admin,demotion,newAdmin.data.token)).status,403);
+assert.equal((await call(admin,demotion)).status,200);
+assert.equal((await call(admin,demotion)).status,200);
+assert.equal((await call(admin,null,newAdmin.data.token)).status,401);
+assert.equal((await call(self,null,newAdmin.data.token)).status,401);
+assert.equal((await call(self,{action:'activate',document:'103',password:'new-admin-password',invitation:pendingAdminInvite.data.url.split('#activate=')[1]},'')).status,400);
+assert.equal((await call(self,{action:'login',document:'103',password:'admin-person-password'},'')).status,401);
+const laborLink=await call(admin,{type:'invite',personId:'person-admin-123',accessRole:'Laboral'});
+const downgraded=await call(self,{action:'activate',document:'103',password:'laboral-person-password',invitation:laborLink.data.url.split('#activate=')[1]},'');
+assert.equal(downgraded.status,200);
+assert.equal(downgraded.data.accessRole,'Laboral');
+assert.equal((await call(admin,null,downgraded.data.token)).status,401);
+assert.equal(sql.prepare("SELECT COUNT(*) AS count FROM audit_logs WHERE target_id=? AND action=?").get('person-admin-123','Quitar acceso').count,1);
 await sql.exec("UPDATE people SET status='Inactivo' WHERE id='person-one-123'");assert.equal((await call(admin,null,anotherAdmin.data.token)).status,401);assert.equal((await call(adminAuth,{action:'login',username:'101',password:'second-admin-password'},'')).status,401);
 for(let i=0;i<10;i++)assert.equal((await call(self,{action:'login',document:'102',code:'wrong'},'')).status,401);assert.equal((await call(self,{action:'login',document:'102',code:'wrong'},'')).status,429);
 console.log('PASS migrations preserve legacy profiles; closed companies/roles; separate names and lists; 10-day limit and authorizer; overlap checks; sanctions; personal access and isolation; meal edits; midnight cutoff; absence blocks; invitation document validation, 24-hour expiry, single-use activation, replacement and password rotation; legacy access; multiple admins, admin login, labor isolation, forged-role rejection, downgrade and inactive revocation; rate limit');})().catch(e=>{console.error(e);process.exit(1)});
