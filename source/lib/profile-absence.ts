@@ -26,7 +26,7 @@ export function prepareProfileAbsence(draft:any,existing:Person|undefined,events
  const event=validateRecord('event',{
   id:draft.absenceId,personId:draft.id,kind,
   start:draft.absenceStart+'T00:00:00-05:00',end:addDays(draft.absenceEnd,1)+'T00:00:00-05:00',
-  place:draft.absenceReason,authorizedBy:kind==='Permiso'?draft.absenceAuthorizedBy:'',notes:draft.absenceNotes||'',
+  place:kind==='Vacaciones'?(events.find(e=>e.id===draft.absenceId&&e.kind===kind)?.place||kind):draft.absenceReason,authorizedBy:kind==='Permiso'?draft.absenceAuthorizedBy:'',notes:draft.absenceNotes||'',
  });
  if(events.some(e=>controlsEvent(draft,e)&&e.id!==event.id&&e.personId===event.personId&&e.start<event.end&&e.end>event.start))throw Error('El período se cruza con otro servicio, permiso, vacaciones o incapacidad.');
  // La ausencia se calcula por fechas; no dejar un estado manual permanente.
