@@ -15,6 +15,26 @@ const generated=await call(admin,{type:'invite',personId:person.id});assert.equa
 const meals={action:'meals',date:'2026-10-05',breakfast:true,lunch:false,dinner:true};assert.equal((await call(self,meals,token)).status,200);assert.equal(sql.prepare('SELECT count(*) AS n FROM meals').get().n,1);assert.equal((await call(self,{...meals,lunch:true},token)).status,200);assert.equal(sql.prepare('SELECT count(*) AS n FROM meals').get().n,1);
 clock=Date.parse('2026-10-05T00:00:00-05:00');assert.equal((await call(self,meals,token)).status,409);assert.equal((await call(self,null,token)).data.date,'2026-10-06');
 const ownPermission=await call(self,{action:'permission',record:{...permit,id:'self-permit-123',personId:'person-two-123',start:'2026-10-06T00:00:00-05:00',end:'2026-10-07T00:00:00-05:00'}},token);assert.equal(ownPermission.status,200);assert.equal(sql.prepare("SELECT person_id FROM events WHERE id='self-permit-123'").get().person_id,person.id);assert.equal((await call(self,{...meals,date:'2026-10-06'},token)).status,409);
+// First-day permission permits breakfast only, including SQL and breakfastKitchen delivery.
+const breakfastOnly={...meals,date:'2026-10-06',breakfast:true,lunch:false,dinner:false,breakfastLocation:'Casa'};
+assert.equal((await call(self,breakfastOnly,token)).status,200);
+assert.equal((await call(self,{...breakfastOnly,lunch:true,lunchLocation:'Mina'},token)).status,409);
+assert.equal((await call(self,{...breakfastOnly,dinner:true,dinnerLocation:'Casa'},token)).status,409);
+const permissionEvent={...permit,start:'2026-10-06T00:00:00-05:00',end:'2026-10-08T00:00:00-05:00'};
+assert.equal(rules.mealBlocked(p,[permissionEvent],'2026-10-06','breakfast'),false);
+assert.equal(rules.mealBlocked(p,[permissionEvent],'2026-10-07','breakfast'),true);
+for(const kind of ['Permiso especial','Vacaciones','Incapacidad'])assert.equal(rules.mealBlocked(p,[{...permissionEvent,kind}],'2026-10-06','breakfast'),true);
+const breakfastKitchen=load('app/api/kitchen/route.ts');
+const breakfastKitchenReq=new Request('https://backend.test/api/breakfastKitchen?date=2026-10-06',{headers:{Origin:'https://controlesmineras.github.io',Authorization:'Bearer admin-secret'}});
+const preparation=await (await breakfastKitchen.GET(breakfastKitchenReq)).json();
+assert.equal(preparation.rows.find(r=>r.id===person.id).breakfast,1);
+assert.equal(preparation.rows.find(r=>r.id===person.id).lunch,0);
+clock=Date.parse('2026-10-06T00:00:00-05:00');
+assert.equal((await call(breakfastKitchen,{action:'attendance',date:'2026-10-06',personId:person.id,meal:'breakfast',received:true})).status,200);
+assert.equal((await call(breakfastKitchen,{action:'attendance',date:'2026-10-06',personId:person.id,meal:'lunch',received:true})).status,409);
+sql.prepare('DELETE FROM meal_attendance WHERE person_id=?').run(person.id);
+clock=Date.parse('2026-10-05T00:00:00-05:00');
+console.log('PASS permission start-day breakfast: personal save, rejected lunch/dinner, next day, other absences, breakfastKitchen and attendance');
 const vacation={...permit,id:'vacation-123',kind:'Vacaciones',start:'2026-10-22T00:00:00-05:00',end:'2026-10-25T00:00:00-05:00'};assert.equal(rules.mealBlocked(p,[rules.validateRecord('event',vacation)],'2026-10-24'),true);assert.equal(rules.mealBlocked(p,[rules.validateRecord('event',vacation)],'2026-10-25'),false);
 const older=await call(admin,{type:'invite',personId:person.id});assert.equal((await call(self,null,token)).status,200);const newer=await call(admin,{type:'invite',personId:person.id});assert.equal((await call(self,{action:'activate',document:person.document,password:'replacement-password',invitation:older.data.url.split('#activate=')[1]},'')).status,400);const renewed=await call(self,{action:'activate',document:person.document,password:'replacement-password',invitation:newer.data.url.split('#activate=')[1]},'');assert.equal(renewed.status,200);assert.equal((await call(self,null,token)).status,401);assert.equal((await call(self,{action:'login',document:person.document,password:'new-password'},'')).status,401);
 const expire=await call(admin,{type:'invite',personId:person.id});clock+=86400000;assert.equal((await call(self,{action:'activate',document:person.document,password:'not-used-password',invitation:expire.data.url.split('#activate=')[1]},'')).status,400);

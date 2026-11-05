@@ -23,7 +23,14 @@ export const statuses=['Disponible','De permiso','De vacaciones','Incapacitado',
 const text=(v:unknown,max=500)=>typeof v==='string'?v.trim().slice(0,max):'';
 export const listItems=(v:unknown):string[]=>Array.isArray(v)?v.map(x=>text(x,150)).filter(Boolean):typeof v==='string'?v.split('\n').map(x=>x.trim()).filter(Boolean):[];
 export function permissionDays(start:string,end:string){return Math.ceil((Date.parse(end)-Date.parse(start))/86400000)}
-export function mealBlocked(person:Person,events:PersonnelEvent[],date:string){if(['Inactivo','De permiso','De vacaciones','Incapacitado','Permiso extraordinario por calamidad'].includes(effectiveBaseStatus(person)||''))return true;const start=date+'T05:00:00.000Z',end=addDays(date,1)+'T05:00:00.000Z';return events.some(e=>e.personId===person.id&&controlsEvent(person,e)&&['Permiso','Permiso especial','Vacaciones','Incapacidad'].includes(e.kind)&&Date.parse(e.start)<Date.parse(end)&&Date.parse(e.end)>Date.parse(start))}
+export function mealBlocked(person:Person,events:PersonnelEvent[],date:string,meal='breakfast'){
+ const start=date+'T05:00:00.000Z',end=addDays(date,1)+'T05:00:00.000Z';
+ const overlapping=events.filter(e=>e.personId===person.id&&controlsEvent(person,e)&&['Permiso','Permiso especial','Vacaciones','Incapacidad'].includes(e.kind)&&Date.parse(e.start)<Date.parse(end)&&Date.parse(e.end)>Date.parse(start));
+ const firstPermissionBreakfast=meal==='breakfast'&&overlapping.some(e=>e.kind==='Permiso'&&bogotaDate(new Date(e.start))===date);
+ const status=effectiveBaseStatus(person)||'';
+ if(['Inactivo','De vacaciones','Incapacitado','Permiso extraordinario por calamidad'].includes(status)||status==='De permiso'&&!firstPermissionBreakfast)return true;
+ return overlapping.some(e=>!(meal==='breakfast'&&e.kind==='Permiso'&&bogotaDate(new Date(e.start))===date));
+}
 export function validateRecord(type:unknown,input:any):any{
  if(!input||typeof input!=='object')throw Error('Registro inválido.');const id=text(input.id,80);if(!/^[a-zA-Z0-9-]{8,80}$/.test(id))throw Error('Identificador inválido.');
  if(type==='activity')return validateActivity(input);
