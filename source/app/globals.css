@@ -163,3 +163,6 @@ body {
 .meal-locations label:has(input:disabled){opacity:.55;cursor:not-allowed}
 
 @media(max-width:560px){.kitchen-totals{grid-template-columns:1fr}}
+
+.access-card .access-logo-button{display:inline-grid;place-items:center;padding:0;border:0;background:transparent;border-radius:12px;cursor:pointer}
+.access-card .access-logo-button:focus-visible{outline:2px solid currentColor;outline-offset:4px}

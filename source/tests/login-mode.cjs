@@ -3,11 +3,12 @@ const moduleValue={exports:{}};
 vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/login-mode.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{module:moduleValue,exports:moduleValue.exports});
 const {initialLoginMode,readLoginMode,rememberLoginMode,LOGIN_MODE_KEY}=moduleValue.exports;
 const entries=new Map(),storage={getItem:key=>entries.get(key)||null,setItem:(key,value)=>entries.set(key,value)};
-assert.equal(initialLoginMode({saved:null}),null);
+assert.equal(initialLoginMode({saved:null}),'seguridad');
 for(const mode of ['admin','seguridad']){
  rememberLoginMode(storage,mode);assert.equal(readLoginMode(storage),mode);
  assert.equal(initialLoginMode({saved:mode,adminSession:true,securitySession:true}),mode);
 }
+assert.equal(initialLoginMode({saved:'admin'}),'seguridad');
 entries.set(LOGIN_MODE_KEY,'Administrador');assert.equal(readLoginMode(storage),null);
 assert.equal(initialLoginMode({saved:null,adminSession:true}),'admin');
 assert.equal(initialLoginMode({saved:null,securitySession:true}),'seguridad');

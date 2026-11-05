@@ -15,11 +15,19 @@ export function rememberLoginMode(storage: PreferenceStorage, mode: LoginMode): 
 export function initialLoginMode(input: {
   saved: LoginMode | null; activation?: boolean; setup?: boolean;
   accessLink?: boolean; adminSession?: boolean; securitySession?: boolean;
-}): LoginMode | null {
+}): LoginMode {
   if (input.activation) return 'seguridad';
   if (input.setup || input.accessLink) return 'admin';
-  if (input.saved) return input.saved;
-  if (input.adminSession) return 'admin';
-  if (input.securitySession) return 'seguridad';
-  return null;
+  if (input.adminSession && (input.saved !== 'seguridad' || !input.securitySession)) return 'admin';
+  return 'seguridad';
+}
+
+// Used only for navigation. The API verifies the signature and permissions.
+export function hasEmployeeProfile(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[0]));
+    return typeof payload.id === 'string' && payload.id.length > 0;
+  } catch {
+    return false;
+  }
 }
