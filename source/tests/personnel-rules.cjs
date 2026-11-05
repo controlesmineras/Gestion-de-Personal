@@ -290,10 +290,12 @@ assert.equal(editedVacation.start,new Date(movedVacation.start).toISOString());
 
 const special={...futureVacation,id:'supervisor-special-permission',start:tomorrow+'T00:00:00-05:00',end:vacationStart+'T00:00:00-05:00'};
 assert.equal((await call(self,{action:'specialPermission',record:special},supervisorAccess.data.token)).status,400);
-assert.equal((await call(self,{action:'specialPermission',record:{...special,authorizedBy:'Jefe de turno'}},supervisorAccess.data.token)).status,200);
+assert.equal((await call(self,{action:'specialPermission',record:{...special,place:'Calamidad doméstica',authorizedBy:'Jefe de turno'}},supervisorAccess.data.token)).status,400);
+assert.equal((await call(self,{action:'specialPermission',record:{...special,place:'Calamidad doméstica',authorizedBy:'Jefe de seguridad'}},supervisorAccess.data.token)).status,200);
 const savedSpecial=(await call(self,null,supervisorAccess.data.token)).data.events.find(e=>e.id===special.id);
 assert.equal(savedSpecial.kind,'Permiso especial');
-assert.equal(savedSpecial.authorizedBy,'Jefe de turno');
+assert.equal(savedSpecial.authorizedBy,'Jefe de seguridad');
+assert.equal(savedSpecial.place,'Calamidad doméstica');
 assert.equal((await call(self,{action:'meals',date:tomorrow,breakfast:true,lunch:false,dinner:false},supervisorAccess.data.token)).status,409);
 
 const deleteSpecial={type:'deleteAbsence',id:savedSpecial.id,start:savedSpecial.start,end:savedSpecial.end};
