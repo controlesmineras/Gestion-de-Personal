@@ -166,3 +166,7 @@ body {
 
 .access-card .access-logo-button{display:inline-grid;place-items:center;padding:0;border:0;background:transparent;border-radius:12px;cursor:pointer}
 .access-card .access-logo-button:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+
+.employee-module-tabs button{border:1px solid #8299a9;background:#fff;font-weight:700;min-height:44px;cursor:pointer}
+.employee-module-tabs button.active{border-color:#173d55}
+.employee-module-tabs button:focus-visible{outline:2px solid #176389;outline-offset:2px}
