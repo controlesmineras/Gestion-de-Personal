@@ -46,6 +46,7 @@ jobs:
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > "$RUNNER_TEMP/login-http.log" 2>&1 &
           node source/tests/login-ui.cjs
+          node source/tests/driver-ui.cjs
       - name: Retain interface screenshots
         if: always()
         uses: actions/upload-artifact@v4
