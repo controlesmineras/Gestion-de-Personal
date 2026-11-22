@@ -53,7 +53,7 @@ export default function PersonnelOverview({data, loading, onRegister, onManage}:
    </div>
    <div className="overview-actions">
     <button type="button" className="secondary" onClick={onRegister}><UserPlus size={18} aria-hidden="true"/>REGISTRAR FUNCIONARIO</button>
-    <button type="button" className="primary" onClick={onManage}><Users size={18} aria-hidden="true"/>GESTIONAR PERSONAL</button>
+    <button type="button" id="open-personnel-management" className="primary" onClick={onManage}><Users size={18} aria-hidden="true"/>GESTIONAR PERSONAL</button>
    </div>
   </section>
  );

@@ -187,6 +187,17 @@ body {
 }
 .group-assignment-note{padding:12px 14px;border-left:3px solid #487e9a;background:#eef5f8;border-radius:5px;line-height:1.5}.record-note .record-note{display:block}
 
+.app main.management-page{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+.management-back{
+  position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:40;
+  display:grid;place-items:center;width:52px;height:52px;min-height:52px;margin:0;padding:0;border-radius:50%;
+  background:#edf3f7;color:#173d59;border:1px solid #b5c8d3;box-shadow:0 4px 18px #102d4140;cursor:pointer;
+}
+.management-back svg{display:block;width:28px;height:28px}
+.management-back:hover{background:#173d59;color:#fff}
+.management-back:focus-visible{outline:3px solid #427b94;outline-offset:3px}
+body:has([role="dialog"][data-state="open"],[role="menu"][data-state="open"],[role="listbox"][data-state="open"]) .management-back{visibility:hidden}
+@media print{.management-back{display:none}}
 .management-heading{display:flex;align-items:center;gap:6px;min-width:0}
 .management-icon{display:grid;place-items:center;flex:none;width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:#fff;cursor:pointer}
 .management-icon:hover,.management-icon[aria-expanded="true"]{background:#ffffff25}
