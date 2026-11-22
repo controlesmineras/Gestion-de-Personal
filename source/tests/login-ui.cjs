@@ -1,5 +1,42 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs');
 const URL_BASE=process.env.LOGIN_TEST_URL||'http://127.0.0.1:4173/';
+async function checkAdminShortcut(browser) {
+ const context=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844},hasTouch:true});
+ const page=await context.newPage();
+ let accessRole='Administrador';
+ const person={id:'employee',document:'12345',name:'Funcionario de prueba',role:'Vigilante',company:'SK'};
+ const token=Buffer.from(JSON.stringify({id:person.id,exp:Date.now()+3600000})).toString('base64')+'.test';
+ const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Bogota'}).format(new Date(Date.now()+86400000));
+ const requests=[];
+ await context.route('**/api/**',async route=>{
+  const request=route.request(),path=new URL(request.url()).pathname;
+  requests.push({path,method:request.method(),authorization:request.headers().authorization});
+  const body=path==='/api/self'
+   ? {person:{...person,accessRole},date,events:[],activities:[],meal:null}
+   : {people:[person],events:[],discipline:[],meals:[]};
+  await route.fulfill({json:body});
+ });
+ await context.addInitScript(session=>localStorage.setItem('gestion-personal-self-session',session),token);
+ await page.goto(URL_BASE);
+ const logo=page.getByRole('button',{name:'Ir a Administración',exact:true});
+ await logo.tap();
+ await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).waitFor();
+ await page.waitForFunction(()=>localStorage.getItem('gestion-personal-v1-cache')!==null);
+ assert(requests.some(r=>r.path==='/api/data'&&r.authorization==='Bearer '+token));
+ assert(requests.every(r=>r.method==='GET'));
+ await page.reload();
+ await page.getByRole('button',{name:'Ir a Seguridad',exact:true}).click();
+ await logo.waitFor();
+ accessRole='Laboral';
+ await page.reload();
+ await page.getByRole('heading',{name:'Alimentos de mañana',exact:true}).waitFor();
+ assert.equal(await logo.count(),0);
+ await page.locator('header .brand img').tap();
+ await page.getByRole('heading',{name:'Alimentos de mañana',exact:true}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).count(),0);
+ await context.close();
+ console.log('PASS authenticated logo: single tap, same session, return to Seguridad and labor-only view');
+}
 (async()=>{
  const browser=await chromium.launch({headless:true});
  const context=await browser.newContext({serviceWorkers:'block'});
@@ -61,5 +98,6 @@ const URL_BASE=process.env.LOGIN_TEST_URL||'http://127.0.0.1:4173/';
  await page.screenshot({path:'test-results/login/selector.png',fullPage:true});
  assert.deepEqual(errors,[]);
  console.log('PASS browser: Security by default, administrator via logo, independent endpoints, rejected credentials, setup/activation, cleared passwords and mobile layout');
+ await checkAdminShortcut(browser);
  await browser.close();
 })().catch(error=>{console.error(error);process.exit(1)});
