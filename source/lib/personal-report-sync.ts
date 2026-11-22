@@ -9,9 +9,10 @@ type SyncOptions = {
   write: (reports: Report[]) => void;
   send: (input: Report['input']) => Promise<unknown>;
   active: () => boolean;
+  onConfirmed?: (report: Report) => void;
 };
 
-export async function syncPersonalReports({serverDate,read,write,send,active}: SyncOptions) {
+export async function syncPersonalReports({serverDate,read,write,send,active,onConfirmed}: SyncOptions) {
   const confirmed = new Set<string>();
   const problems: string[] = [];
   // Use the reporting date supplied by the authenticated server, including at midnight.
@@ -42,6 +43,7 @@ export async function syncPersonalReports({serverDate,read,write,send,active}: S
     }
     write(read().filter(item => item.id !== report.id));
     confirmed.add(report.id);
+    onConfirmed?.(report);
   }
   return {confirmed,problems};
 }

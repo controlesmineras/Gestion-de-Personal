@@ -1,4 +1,20 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict');
+const receiptText='Recibí tu reporte de alimentos y ya está listo para que lo consulten.';
+const mealReceipt=page=>page.getByRole('dialog',{name:receiptText,exact:true});
+
+async function acknowledgeMeal(page) {
+ const dialog=mealReceipt(page);
+ await dialog.waitFor();
+ const button=dialog.getByRole('button',{name:'ENTENDIDO',exact:true});
+ const layout=await dialog.evaluate(el=>{
+  const rect=el.getBoundingClientRect(),icon=el.querySelector('svg');
+  return {dx:rect.left+rect.width/2-innerWidth/2,dy:rect.top+rect.height/2-innerHeight/2,iconColor:getComputedStyle(icon).color};
+ });
+ assert(Math.abs(layout.dx)<2&&Math.abs(layout.dy)<2,'The receipt dialog is centered');
+ assert.equal(layout.iconColor,'rgb(22, 115, 68)');
+ await button.click();
+ await dialog.waitFor({state:'hidden'});
+}
 async function checkAdminMeals(browser){
  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844}});
  const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -88,12 +104,16 @@ async function checkMealRecovery(browser){
   await history.click();
   await page.getByText(old.split('-').reverse().join('/')+' · Desayuno · Mina',{exact:true}).waitFor();
   assert.deepEqual(await page.evaluate(k=>JSON.parse(localStorage.getItem(k)).map(x=>x.id),key),['expired','valid']);
+  assert.equal(await mealReceipt(page).count(),0);
   fail=false;await retry.click();
-  await page.getByText('Reportes sincronizados: 1.',{exact:true}).waitFor();
+  await mealReceipt(page).waitFor();
+  await page.reload();
+  await acknowledgeMeal(page);
   assert.equal(await retry.count(),0);
   assert.equal(saved.breakfastLocation,'Mina');assert(submitted.every(d=>d===tomorrow));
   await page.reload();await history.waitFor();
   await page.getByText(/Ya hiciste un reporte de alimentos/).waitFor();
+  assert.equal(await mealReceipt(page).count(),0);
   const remaining=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
   assert.deepEqual(remaining,[{...expired,closedForDate:tomorrow}]);assert.deepEqual(errors,[]);
   console.log('PASS mobile: archived overdue order, kept current order on 503, delivered it by manual retry, persisted history after reload');
@@ -137,7 +157,7 @@ assert.equal(await breakfastDestinations.getByRole('radio',{name:'Casa',exact:tr
 await breakfast.check();
 assert.equal(await breakfastDestinations.getByRole('radio',{name:'Casa',exact:true}).isChecked(),false);
 assert.equal(await page.locator('.meal-report-card form').evaluate(form=>form.checkValidity()),false,'Selected meal requires a destination');
-await breakfastDestinations.getByRole('radio',{name:'Casa',exact:true}).check();await page.getByRole('button',{name:'Guardar alimentos',exact:true}).click();await page.getByText('Reporte sincronizado.',{exact:true}).waitFor();assert.equal(saved.action,'meals');assert.equal(saved.breakfast,true);assert.equal(saved.breakfastLocation,'Casa');assert.equal(saved.personId,undefined);
+await breakfastDestinations.getByRole('radio',{name:'Casa',exact:true}).check();await page.getByRole('button',{name:'Guardar alimentos',exact:true}).click();await acknowledgeMeal(page);assert.equal(saved.action,'meals');assert.equal(saved.breakfast,true);assert.equal(saved.breakfastLocation,'Casa');assert.equal(saved.personId,undefined);
 await page.getByRole('button',{name:'Actualizar reporte',exact:true}).waitFor();
 await page.reload();
 await page.getByText('Ya hiciste un reporte de alimentos para esta fecha. ¿Deseas actualizarlo?',{exact:true}).waitFor();
@@ -149,8 +169,15 @@ const refresh=page.waitForResponse(response=>response.url().endsWith('/api/self'
 await page.evaluate(()=>window.dispatchEvent(new Event('online')));
 await refresh;
 assert.equal(await mine.isChecked(),true);
+await context.setOffline(true);
+await page.waitForFunction(()=>!navigator.onLine);
 await page.getByRole('button',{name:'Actualizar reporte',exact:true}).click();
-await page.getByText('Reporte sincronizado.',{exact:true}).waitFor();
+await page.getByText('El reporte de alimentos está guardado en este dispositivo y sigue pendiente de envío a cocina.').waitFor();
+assert.equal(await mealReceipt(page).count(),0);
+assert.equal(saved.breakfastLocation,'Casa');
+await context.setOffline(false);
+await acknowledgeMeal(page);
+assert.equal(await page.getByRole('button',{name:'Sincronizar pendientes'}).count(),0);
 assert.equal(saved.breakfastLocation,await mine.getAttribute('value'));
 await page.evaluate(()=>{localStorage.removeItem('gestion-personal-self-session');localStorage.setItem('gestion-personal-v1-access','test-admin');localStorage.setItem('gestion-personal-login-mode-v1','admin')});await page.reload();await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).click();await page.getByRole('button',{name:'Opciones de gestión'}).click();await page.getByRole('menuitemradio',{name:'Cocina',exact:true}).click();await page.getByRole('heading',{name:'Conductor',exact:true}).waitFor();assert.equal(await page.locator('tbody tr').filter({hasText:'Conductor Prueba'}).count(),0);await page.getByRole('button',{name:'Administrar acceso a alimentos'}).click();await page.getByText('ALIMENTOS · CONDUCTOR',{exact:true}).waitFor();assert.equal(await page.locator('legend').filter({hasText:'ADMINISTRADOR'}).count(),0);assert.deepEqual(errors,[]);
 await page.setViewportSize({width:390,height:844});assert.equal(await page.getByRole('dialog').isVisible(),true);await checkMealRecovery(browser);await checkAdminMeals(browser);await browser.close();console.log('PASS conductor: own meals save, no novelties/activities/profile, final separate card and food-only invitation on desktop/mobile');

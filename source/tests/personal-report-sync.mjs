@@ -43,3 +43,16 @@ test('a change during upload and another account are preserved',async()=>{
   q.options.active=()=>false;
   assert.equal((await q.run()).confirmed.size,0);assert.deepEqual(q.options.read(),[next]);
 });
+
+test('a meal receipt is issued once even if the next upload fails',async()=>{
+  const food=meal('delivered',date),other={id:'later',input:{action:'permission'}};
+  const q=queue([food,other],async input=>{
+    if(input.action==='permission')throw Object.assign(new Error('Servicio sin conexión'),{status:503});
+  });
+  const receipts=[];
+  q.options.onConfirmed=report=>receipts.push(report.id);
+  await assert.rejects(q.run(),/Servicio sin conexión/);
+  await assert.rejects(q.run(),/Servicio sin conexión/);
+  assert.deepEqual(receipts,['delivered']);
+  assert.deepEqual(q.options.read(),[other]);
+});
