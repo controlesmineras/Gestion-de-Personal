@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {ArrowLeftRight, Users, UserPlus} from 'lucide-react';
+import {ArrowLeftRight, Users, UserPlus, Utensils} from 'lucide-react';
 import {personnelOverview} from '@/lib/dashboard';
 import type {Data} from '@/lib/personnel';
 
@@ -33,11 +33,12 @@ function companyValues(counts: {SK: number; 'E-SECURITY': number}): CardValue[] 
  ];
 }
 
-export default function PersonnelOverview({data, loading, onRegister, onManage}: {
+export default function PersonnelOverview({data, loading, onRegister, onManage, onMeals}: {
  data: Data;
  loading: boolean;
  onRegister: () => void;
  onManage: () => void;
+ onMeals: () => void;
 }) {
  const {personnel, available, external} = personnelOverview(data);
  return (
@@ -54,6 +55,7 @@ export default function PersonnelOverview({data, loading, onRegister, onManage}:
    <div className="overview-actions">
     <button type="button" className="secondary" onClick={onRegister}><UserPlus size={18} aria-hidden="true"/>REGISTRAR FUNCIONARIO</button>
     <button type="button" id="open-personnel-management" className="primary" onClick={onManage}><Users size={18} aria-hidden="true"/>GESTIONAR PERSONAL</button>
+    <button type="button" id="open-meal-reports" className="secondary overview-meals" onClick={onMeals}><Utensils size={18} aria-hidden="true"/>ALIMENTOS</button>
    </div>
   </section>
  );

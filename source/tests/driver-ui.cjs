@@ -8,6 +8,15 @@ async function checkAdminMeals(browser){
  await context.addInitScript(()=>{localStorage.setItem('gestion-personal-v1-access','test-admin');localStorage.setItem('gestion-personal-login-mode-v1','admin')});
  await context.route('**/api/**',route=>route.fulfill({json:{people,events:[],discipline:[],meals:meals.map((meal,i)=>({personId:people[i].id,date,[meal]:1,[meal+'Location']:i===1?'Mina':'Casa'}))}}));
  await page.goto(process.env.LOGIN_TEST_URL||'http://127.0.0.1:4173');
+ const shortcut=page.getByRole('button',{name:'ALIMENTOS',exact:true});
+ await shortcut.click();
+ await page.getByRole('heading',{name:'Alimentos de mañana · '+date.split('-').reverse().join('/')}).waitFor();
+ await page.locator('.meal-report-count b').first().filter({hasText:'1'}).waitFor();
+ assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),['1','1','1']);
+ await page.getByRole('button',{name:/Almuerzo/}).click();
+ assert.match(await page.locator('.meal-report-details:visible').innerText(),/Mina · Enviar/);
+ await page.getByRole('button',{name:'Volver a la pantalla anterior'}).click();
+ await shortcut.waitFor();
  await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).click();
  await page.locator('.module-tabs').getByRole('button',{name:'Alimentos',exact:true}).click();
  const toggles=page.locator('.meal-report-toggle'),panels=page.locator('.meal-report-details');
