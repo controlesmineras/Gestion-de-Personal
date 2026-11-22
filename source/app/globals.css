@@ -181,8 +181,8 @@ body {
 .meal-options-row .meal-check input{width:20px;height:20px;min-height:20px;margin:0;padding:0;accent-color:#214f6c}
 .meal-options-row .meal-locations{margin:0}
 .meal-options-row .meal-locations legend{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.meal-options-row .meal-locations>div{display:flex;flex-wrap:nowrap;gap:6px}
-.meal-options-row .meal-locations label{min-height:44px;gap:6px;padding:8px;font-size:14px;background:#fff}
+.meal-options-row .meal-locations>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.meal-options-row .meal-locations label{min-height:44px;justify-content:center;gap:6px;padding:8px 12px;font-size:14px;background:#fff}
 .meal-options-row .meal-locations label:has(input:checked){background:#e5eff5}
 .employee-card .meal-options-row input[type=radio]{width:16px;height:16px;min-height:16px;padding:0;flex-shrink:0}
 @media(max-width:800px){.admin-meal-totals{grid-template-columns:minmax(0,1fr)}}
@@ -191,7 +191,7 @@ body {
  .meal-options-row .meal-choice{gap:6px;padding:8px 6px}
  .employee-card .meal-options-row .meal-check{gap:6px;font-size:14px}
  .meal-options-row .meal-check input{width:18px;height:18px;min-height:18px;flex-shrink:0}
- .meal-options-row .meal-locations label{padding:6px}
+ .meal-options-row .meal-locations label{padding:6px 7px}
 }
 
 @media(max-width:560px){.kitchen-totals{grid-template-columns:1fr}}
