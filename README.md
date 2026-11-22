@@ -80,7 +80,7 @@ Después de Generar actividad y desde cada tarjeta administrativa, Copiar mensaj
 
 ## Disponibilidad, novedades y documentos
 
-El dashboard cuenta al personal asignado al grupo seleccionado y desglosa SK y E-SECURITY, salvo Escoltas, cuya tarjeta omite SK. Disponibles muestra el estado actual y el desglose por empresa; Listos para asignar conserva los controles de carga y descanso.
+La tarjeta Disponibles muestra la cantidad del grupo seleccionado para una empresa a la vez. Al tocarla alternan la cifra, el nombre y los colores de SK y E-SECURITY. La empresa inicial se alterna en cada apertura del tablero en el mismo dispositivo. La disponibilidad para asignar sigue teniendo en cuenta la carga y el descanso.
 
 La ficha permite programar o registrar Permiso, Vacaciones e Incapacidad, con fechas inclusivas y sin restricción al día actual. La ausencia cambia el estado durante su intervalo y se verifica en los cruces de servicios, actividades y alimentos. El portal personal incluye estas novedades y su cola local.
 
@@ -102,7 +102,7 @@ Seguridad se llama Personal y Gerencia se llama Escoltas. Personal muestra a tod
 
 Escoltas reúne las asignaciones anteriores a Gerencia y a quienes tienen cargo Escolta con el grupo anterior Seguridad o sin grupo. Esto incluye a los escoltas del director de Seguridad. No se reescriben fichas ni servicios históricos: la compatibilidad se aplica al leer y validar. Un traslado explícito posterior al nuevo grupo Personal sigue siendo posible desde Editar ficha > Grupo de servicio y queda auditado. Los nuevos escoltas proponen Escoltas como grupo; cargo y grupo siguen siendo campos distintos. Clientes anteriores no pueden asignar estos escoltas a servicios generales mediante los nombres antiguos.
 
-Personal permite Generar actividad directamente desde su lista, con labor, horario, asistentes disponibles, encargado y función individual. Los escoltas reservados quedan excluidos de servicios y actividades de Personal, tanto en la interfaz como en la validación del servidor y la escritura atómica. En Escoltas se conservan sus acompañamientos propios, ausencias, carga y descanso. La tarjeta de Escoltas conserva el desglose E-SECURITY sin SK.
+Personal permite Generar actividad directamente desde su lista, con labor, horario, asistentes disponibles, encargado y función individual. Los escoltas reservados quedan excluidos de servicios y actividades de Personal, tanto en la interfaz como en la validación del servidor y la escritura atómica. En Escoltas se conservan sus acompañamientos propios, ausencias, carga y descanso.
 
 Administrativo conserva su grupo y disponibilidad propios. Alimentos reúne cocina y conductores. Los conductores no se cuentan disponibles para servicios y conservan permisos e historial. Todos los administradores usan el mismo botón Registrar funcionario. No se requiere migración de base de datos.
 

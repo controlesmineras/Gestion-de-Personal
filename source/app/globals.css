@@ -138,12 +138,57 @@ body {
 
 .record-fields{display:contents}
 
-.company-availability{display:grid;gap:8px;margin:14px 0 0}.company-availability>div{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 12px;border:1px solid #dce5ec;background:#f5f8fa;border-radius:8px;padding:8px 10px}.company-availability dt{font-size:12px;font-weight:650;overflow-wrap:anywhere}.company-availability dd{margin:0;font-size:18px;font-weight:750;line-height:1.2}.ready-availability{display:block;margin:14px 0 0;padding-top:12px;border-top:1px solid #dce5ec;font-size:12px;line-height:1.5}.ready-availability strong{font-size:15px}.stats{align-items:stretch}
-.availability-total{display:flex;align-items:center;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;margin-top:17px}
-.stats .availability-total>b{margin:0}
-.availability-detail{border:0;background:transparent;color:#21516b;padding:4px 0;font:inherit;font-size:.78rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.availability-detail::after{content:"";position:absolute;inset:0;border-radius:12px}
-.availability-detail:focus-visible::after{outline:2px solid #276585;outline-offset:2px}
+.stats{align-items:stretch}
+.stats article.availability-card{
+  --company-surface:#112c42;
+  --company-ink:#fff;
+  --company-accent:#ebad3f;
+  container-type:inline-size;
+  padding:0;
+  background:var(--company-surface);
+  color:var(--company-ink);
+  border:1px solid var(--company-surface);
+  border-top:3px solid var(--company-accent);
+}
+.stats .availability-card[data-company="E-SECURITY"]{
+  --company-surface:#fff9c9;
+  --company-ink:#273665;
+  --company-accent:#f7eb4a;
+  border-color:#c4b842;
+  border-top-color:var(--company-accent);
+}
+.availability-switch{
+  display:block;
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:20px 22px 22px;
+  border:0;
+  border-radius:inherit;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.availability-switch:focus-visible{outline:3px solid #276585;outline-offset:3px}
+.availability-heading{display:block;margin-right:26px;font-size:14px}
+.availability-arrows{position:absolute;top:20px;right:20px;width:18px;color:var(--company-accent)}
+.availability-card[data-company="E-SECURITY"] .availability-arrows{color:var(--company-ink)}
+.availability-value{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:17px}
+.stats .availability-value>b{margin:0;color:inherit}
+.availability-value>span{font-size:12px;font-weight:650;white-space:nowrap;color:var(--company-accent)}
+.availability-card[data-company="E-SECURITY"] .availability-value>span{color:var(--company-ink)}
+@media(max-width:480px){
+  .availability-switch{padding:15px 17px 17px}
+  .availability-heading{font-size:12px}
+  .availability-arrows{top:14px;right:14px;width:16px}
+}
+@container(max-width:205px){
+  .availability-heading>span{display:none}
+  .availability-value>span{font-size:10px}
+}
+
 
 
 .gp-table tbody tr.person-available>td{background:#edf8f0}.gp-table tbody tr.person-available:hover>td{background:#e0f2e6}

@@ -1,5 +1,5 @@
-const CACHE='gestion-personal-shell-login-selector-index-DwyMGX74.js';
-const CORE=['./','./index.html',"./assets/index-DwyMGX74.js","./assets/index-eUK-04r8.css",'./favicon.svg','./manifest.webmanifest','./install-app.js'];
+const CACHE='gestion-personal-shell-login-selector-index-DaginaCo.js';
+const CORE=['./','./index.html',"./assets/index-DaginaCo.js","./assets/index-DlM9Lag1.css",'./favicon.svg','./manifest.webmanifest','./install-app.js'];
 self.addEventListener('install',event=>event.waitUntil(
   caches.open(CACHE).then(cache=>cache.addAll(CORE.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())
 ));

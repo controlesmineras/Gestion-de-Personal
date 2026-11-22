@@ -341,7 +341,7 @@ assert.equal(work.workload(savedAdministrative,[],undefined,clock).canAssignMine
 const viewPeople=[
  {...savedAdministrative,name:'Ana SST'},
  {...savedAdministrative,id:'operator-view',name:'Ana Operador',role:'Operador de seguridad',serviceGroup:'Personal'},
- {...savedAdministrative,id:'escort-z-view',name:'Zoé Escolta',role:'Escolta',serviceGroup:'Escoltas'},
+ {...savedAdministrative,id:'escort-z-view',name:'Zoé Escolta',company:'SK',role:'Escolta',serviceGroup:'Escoltas'},
  {...savedAdministrative,id:'supervisor-view',name:'Ana Supervisor',role:'Supervisor',serviceGroup:'Personal'},
  {...savedAdministrative,id:'director-view',name:'Zeta Director',role:'Director de seguridad',serviceGroup:'Personal'},
  {...savedAdministrative,id:'chief-view',name:'Ana Jefe',role:'Jefe de seguridad',serviceGroup:'Personal'},
@@ -359,7 +359,9 @@ assert.equal(groups.personnelForGroup(viewPeople,'Alimentos').length,2);
 const viewData={people:viewPeople,events:[]};
 assert.equal(dashboardGroups.dashboardSummary(viewData,'Personal',clock).ready.length,5);
 assert.equal(dashboardGroups.dashboardSummary(viewData,'Administrativo',clock).ready.length,1);
-assert.equal(dashboardGroups.dashboardSummary(viewData,'Escoltas',clock).byCompany.some(x=>x.company==='SK'),false);
+const escortCompanies=dashboardGroups.dashboardSummary(viewData,'Escoltas',clock).byCompany;
+assert.equal(escortCompanies.find(x=>x.company==='SK').count,1);
+assert.equal(escortCompanies.find(x=>x.company==='E-SECURITY').count,0);
 assert.equal(dashboardGroups.dashboardSummary(viewData,'Personal',clock).byCompany.some(x=>x.company==='SK'),true);
 const oldAdministrative={...administrative};delete oldAdministrative.serviceGroup;
 assert.equal((await call(admin,{type:'person',record:{...oldAdministrative,phone:'3100000020'}})).status,200);
@@ -394,7 +396,7 @@ for(const group of ['', 'Personal']){
  assert.equal(sql.prepare('SELECT id FROM activities WHERE id=?').get(id),undefined);
  assert.equal(sql.prepare('SELECT count(*) AS n FROM events WHERE activity_id=?').get(id).n,0);
 }
-console.log('PASS four groups: broad Security view, role/name order, immutable tab queries, exact group cards, no SK in Gerencia card, persisted Administrative assignment, legacy safety, shared admin access, audited transfers, atomic service/activity races');
+console.log('PASS four groups: broad Security view, role/name order, immutable tab queries, exact group cards, per-company counts in Escoltas, persisted Administrative assignment, legacy safety, shared admin access, audited transfers, atomic service/activity races');
 
 // Existing Gerencia escorts and director escorts stored as Seguridad are both reserved.
 const directorEscort={...person,id:'director-escort-legacy',document:'director-escort-001',role:'Escolta',status:'Disponible',serviceGroup:'Escoltas'};
