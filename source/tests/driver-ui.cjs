@@ -90,8 +90,13 @@ for(const radio of await page.getByRole('radio').all())assert.equal(await radio.
 for(const width of [320,360,390,1280]){
  await page.setViewportSize({width,height:844});
  const cards=await page.locator('.meal-choice').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right}}));
- assert.equal(cards.length,3);assert(cards.every(card=>card.y===cards[0].y),'Three meals in one row at '+width);
- assert(cards[0].x<cards[1].x&&cards[1].x<cards[2].x&&cards[2].right<=width,'Meals fit the viewport');
+ assert.equal(cards.length,3);assert(cards[0].y<cards[1].y&&cards[1].y<cards[2].y,'Each meal has its own row at '+width);
+ assert(cards.every(card=>card.x===cards[0].x&&card.right<=width),'Meal rows fit the viewport');
+ const rows=await page.locator('.meal-choice').evaluateAll(nodes=>nodes.map(node=>[node.querySelector('.meal-check'),...node.querySelectorAll('.meal-locations label')].map(el=>{const r=el.getBoundingClientRect();return {x:r.x,right:r.right,cy:r.y+r.height/2}})));
+ for(const row of rows){
+  assert.equal(row.length,3);assert(row[0].right<=row[1].x&&row[1].right<=row[2].x,'Casa and Mina stay to the right of the meal at '+width);
+  assert(row.every(item=>Math.abs(item.cy-row[0].cy)<1),'Meal and destinations share one row at '+width);
+ }
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow at '+width);
 }
 await breakfast.check();
