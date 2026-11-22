@@ -13,3 +13,34 @@ export function dashboardSummary(data:Data,tab='personal',now=Date.now()){
  }));
  return {people,available,ready,inService:rows.filter(r=>r.status==='En servicio'),byCompany};
 }
+
+/** Administrative headcounts cover both companies and all service groups. */
+export function personnelOverview(data: Data, now = Date.now()) {
+ const personnel = {SK: 0, 'E-SECURITY': 0};
+ const available = {SK: 0, 'E-SECURITY': 0};
+ const external = {cooks: 0, drivers: 0};
+ const eventsByPerson = new Map<string, Data['events']>();
+ for (const event of data.events) {
+  const events = eventsByPerson.get(event.personId);
+  if (events) events.push(event);
+  else eventsByPerson.set(event.personId, [event]);
+ }
+ for (const person of data.people) {
+  if (person.role === 'Preparación de alimentos') {
+   external.cooks++;
+   continue;
+  }
+  if (person.role === 'Conductor') {
+   external.drivers++;
+   continue;
+  }
+  const company = person.company;
+  if (company !== 'SK' && company !== 'E-SECURITY') continue;
+  personnel[company]++;
+  const {status} = workload(person, eventsByPerson.get(person.id) ?? [], data.workSettings, now);
+  if (status === 'En servicio' || status === 'Disponible' || status === 'En descanso') {
+   available[company]++;
+  }
+ }
+ return {personnel, available, external};
+}

@@ -80,7 +80,9 @@ Después de Generar actividad y desde cada tarjeta administrativa, Copiar mensaj
 
 ## Disponibilidad, novedades y documentos
 
-La tarjeta Disponibles muestra la cantidad del grupo seleccionado para una empresa a la vez. Al tocarla alternan la cifra, el nombre y los colores de SK y E-SECURITY. La empresa inicial se alterna en cada apertura del tablero en el mismo dispositivo. La disponibilidad para asignar sigue teniendo en cuenta la carga y el descanso.
+Al entrar en Administración, las tarjetas Personal y Personal disponible recorren Todos, E-SECURITY y SK. La primera cuenta las fichas de ambas empresas excepto cocina y conducción. La segunda incluye a quienes están en servicio, disponibles o en descanso. Servicios externos cuenta cocina y conducción por separado. Registrar funcionario abre el formulario y Gestionar personal abre los grupos y sus módulos.
+
+Dentro de la gestión de un grupo, la tarjeta Disponibles muestra la cantidad del grupo seleccionado para una empresa a la vez. Al tocarla alternan la cifra, el nombre y los colores de SK y E-SECURITY. La empresa inicial se alterna en cada apertura del tablero en el mismo dispositivo. La disponibilidad para asignar sigue teniendo en cuenta la carga y el descanso.
 
 La ficha permite programar o registrar Permiso, Vacaciones e Incapacidad, con fechas inclusivas y sin restricción al día actual. La ausencia cambia el estado durante su intervalo y se verifica en los cruces de servicios, actividades y alimentos. El portal personal incluye estas novedades y su cola local.
 

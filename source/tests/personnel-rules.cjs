@@ -141,6 +141,27 @@ const dashboard=load('lib/dashboard.ts'),absent={...permit,id:'future-vacation-t
 assert.equal((await call(admin,{type:'event',record:absent})).status,200);
 const sk={...p,id:'sk-operator-test',role:'Operador de seguridad',company:'SK',status:'Disponible'},es={...sk,id:'es-test-worker',company:'E-SECURITY'},data={people:[sk,es,{...sk,id:'cook-test-worker',role:'Preparación de alimentos'}],events:[]};
 let summary=dashboard.dashboardSummary(data,'personal',clock);assert.equal(summary.available.length,2);assert.equal(summary.byCompany.find(x=>x.company==='SK').count,1);assert.equal(summary.byCompany.find(x=>x.company==='E-SECURITY').count,1);assert.equal(dashboard.dashboardSummary(data,'cocina',clock).available.length,1);
+// The landing counts all eligible groups, even when their staff are reserved for other services.
+const headcountRoster = {
+ people: [
+  {...sk, id:'off-duty', status:'Descanso'},
+  {...es, id:'escort', role:'Escolta', serviceGroup:'Escoltas'},
+  {...es, id:'office', serviceGroup:'Administrativo'},
+  {...sk, id:'on-leave'},
+  {...sk, id:'inactive', status:'Inactivo'},
+  {...sk, id:'legacy-no-company', company:undefined},
+  {...sk, id:'cook', role:'Preparación de alimentos'},
+  {...es, id:'driver', role:'Conductor'},
+ ],
+ events: [
+  {...absent, personId:'escort', kind:'Servicio'},
+  {...absent, personId:'on-leave', kind:'Vacaciones'},
+ ],
+};
+const overview = dashboard.personnelOverview(headcountRoster, Date.parse(absent.start));
+assert.deepEqual({...overview.personnel}, {SK:3,'E-SECURITY':2});
+assert.deepEqual({...overview.available}, {SK:1,'E-SECURITY':2});
+assert.deepEqual({...overview.external}, {cooks:1,drivers:1});
 const future={...absent,personId:sk.id};assert.equal(rules.personStatus(sk,[future],Date.parse(future.start)-1),'Disponible');assert.equal(rules.personStatus(sk,[future],Date.parse(future.start)),'De vacaciones');assert.equal(rules.personStatus(sk,[future],Date.parse(future.end)),'Disponible');assert.equal(rules.mealBlocked(sk,[future],'2027-01-12'),true);assert.equal(rules.mealBlocked(sk,[future],'2027-01-13'),false);
 const incapacity={...absent,id:'incapacity-one-test',kind:'Incapacidad',start:'2027-02-10T05:00:00.000Z',end:'2027-02-12T05:00:00.000Z'};assert.equal((await call(admin,{type:'event',record:incapacity})).status,200);assert.equal((await call(admin,{type:'event',record:{...incapacity,id:'incapacity-service',kind:'Servicio'}})).status,400);assert.equal(rules.personStatus({...sk,id:incapacity.personId},[incapacity],Date.parse(incapacity.start)),'Incapacitado');assert.equal(rules.mealBlocked({...sk,id:incapacity.personId},[incapacity],'2027-02-11'),true);assert.equal(rules.personStatus(sk,[],clock),'Disponible');
 const privateFiles=new Map();env.BUCKET={async put(key,bytes,opts){privateFiles.set(key,{body:bytes,...opts})},async get(key){return privateFiles.get(key)||null},async head(key){return privateFiles.get(key)||null}};
