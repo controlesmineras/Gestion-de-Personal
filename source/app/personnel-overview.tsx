@@ -1,6 +1,7 @@
 import {useState} from 'react';
-import {ArrowLeftRight, Users, UserPlus, Utensils} from 'lucide-react';
+import {ArrowLeftRight, ChevronRight, Users, UserPlus, Utensils} from 'lucide-react';
 import {personnelOverview} from '@/lib/dashboard';
+import {mealReportSummary} from '@/lib/meal-report-summary';
 import type {Data} from '@/lib/personnel';
 
 type CardValue = {label: string; count: number};
@@ -33,14 +34,16 @@ function companyValues(counts: {SK: number; 'E-SECURITY': number}): CardValue[] 
  ];
 }
 
-export default function PersonnelOverview({data, loading, onRegister, onManage, onMeals}: {
+export default function PersonnelOverview({data, mealDate, loading, onRegister, onManage, onMeals}: {
  data: Data;
+ mealDate: string;
  loading: boolean;
  onRegister: () => void;
  onManage: () => void;
  onMeals: () => void;
 }) {
  const {personnel, available, external} = personnelOverview(data);
+ const meals = mealReportSummary(data, mealDate);
  return (
   <section aria-label="Inicio de administración">
    <div className="overview-cards">
@@ -55,7 +58,19 @@ export default function PersonnelOverview({data, loading, onRegister, onManage, 
    <div className="overview-actions">
     <button type="button" className="secondary" onClick={onRegister}><UserPlus size={18} aria-hidden="true"/>REGISTRAR FUNCIONARIO</button>
     <button type="button" id="open-personnel-management" className="primary" onClick={onManage}><Users size={18} aria-hidden="true"/>GESTIONAR PERSONAL</button>
-    <button type="button" id="open-meal-reports" className="secondary overview-meals" onClick={onMeals}><Utensils size={18} aria-hidden="true"/>ALIMENTOS</button>
+    <button type="button" id="open-meal-reports" className="overview-meals" onClick={onMeals}
+     aria-labelledby="overview-meals-title" aria-describedby="overview-meals-date overview-meals-counts">
+     <span className="overview-meals-heading">
+      <Utensils size={18} aria-hidden="true"/><strong id="overview-meals-title">ALIMENTOS</strong>
+      <span id="overview-meals-date">Mañana · {mealDate.split('-').reverse().join('/')}</span>
+      <ChevronRight size={18} aria-hidden="true"/>
+     </span>
+     <span className="overview-meals-counts" id="overview-meals-counts">
+      <span>Reportes <b>{loading ? '…' : meals.reports}</b></span>
+      <span>En casa <b>{loading ? '…' : meals.house}</b></span>
+      <span>En mina <b>{loading ? '…' : meals.mine}</b></span>
+     </span>
+    </button>
    </div>
   </section>
  );

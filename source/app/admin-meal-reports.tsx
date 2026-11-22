@@ -1,7 +1,8 @@
 import {useState, useSyncExternalStore} from 'react';
 import {ChevronDown} from 'lucide-react';
-import {MEAL_OPTIONS, mealLocationKey, type MealKey} from '@/lib/meals';
-import {mealBlocked, type Data} from '@/lib/personnel';
+import type {MealKey} from '@/lib/meals';
+import type {Data} from '@/lib/personnel';
+import {mealReportSummary} from '@/lib/meal-report-summary';
 import {MealReportTimes} from './meal-report-times';
 
 // Matches the breakpoint at which the three report columns become a single stack.
@@ -30,23 +31,8 @@ export default function AdminMealReports({data, date}: {data: Data; date: string
   }
  }
 
- const people = new Map(data.people.map(person => [person.id, person]));
- const reports = (data.meals ?? []).flatMap(meal => {
-  if (meal.date !== date) return [];
-  const person = people.get(meal.personId);
-  if (!person || mealBlocked(person, data.events, date)) return [];
-  return [{meal, person}];
- });
-
- return <div className="meal-totals admin-meal-totals">{MEAL_OPTIONS.map(([key,label])=>{
- const locationKey=mealLocationKey(key);
- const diners=reports
-  .filter(({meal,person})=>meal[key] && (key==='breakfast' || !mealBlocked(person,data.events,date,key)))
-  .sort((a,b)=>a.person.name.localeCompare(b.person.name,'es'));
- const house=diners.filter(({meal})=>meal[locationKey]==='Casa').length;
- const mine=diners.filter(({meal})=>meal[locationKey]==='Mina').length;
- const unknown=diners.length-house-mine;
-
+ const {meals} = mealReportSummary(data, date);
+ return <div className="meal-totals admin-meal-totals">{meals.map(({key, label, locationKey, diners, house, mine, unknown}) => {
  const expanded = stacked ? expandedMeal === key : !collapsedColumns.includes(key);
  return <article className="admin-meal-report" key={key}>
   <h3><button type="button" className="meal-report-toggle" id={'meal-toggle-'+key}
