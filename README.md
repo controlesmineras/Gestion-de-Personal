@@ -82,7 +82,7 @@ Después de Generar actividad y desde cada tarjeta administrativa, Copiar mensaj
 
 Al entrar en Administración, las tarjetas Personal y Personal disponible recorren Todos, E-SECURITY y SK. La primera cuenta las fichas de ambas empresas excepto cocina y conducción. La segunda incluye a quienes están en servicio, disponibles o en descanso. Servicios externos cuenta cocina y conducción por separado. Registrar funcionario abre el formulario y Gestionar personal abre los grupos y sus módulos.
 
-Dentro de la gestión de un grupo, la tarjeta Disponibles muestra la cantidad del grupo seleccionado para una empresa a la vez. Al tocarla alternan la cifra, el nombre y los colores de SK y E-SECURITY. La empresa inicial se alterna en cada apertura del tablero en el mismo dispositivo. La disponibilidad para asignar sigue teniendo en cuenta la carga y el descanso.
+Gestionar personal abre el listado de Personal. El menú de la cabecera permite cambiar el grupo y abrir Carga y descanso. La flecha vuelve a las tres tarjetas del inicio.
 
 La ficha permite programar o registrar Permiso, Vacaciones e Incapacidad, con fechas inclusivas y sin restricción al día actual. La ausencia cambia el estado durante su intervalo y se verifica en los cruces de servicios, actividades y alimentos. El portal personal incluye estas novedades y su cola local.
 
@@ -100,7 +100,7 @@ En funcionarios existentes, solo el número de documento, nombres y apellidos pe
 
 ## Grupos de servicio: Personal, Escoltas, Administrativo y Alimentos
 
-Seguridad se llama Personal y Gerencia se llama Escoltas. Personal muestra a todos excepto Conductor y Preparación de alimentos, ordenados por cargo y nombre. Incluye a los reservados para Escoltas y Administrativo, identificados como tales; el total de personal refleja esta lista. Los contadores Disponibles y Listos para asignar y el filtro Disponible incluyen únicamente el grupo Personal. Cambiar de pestaña no modifica fichas ni asignaciones.
+Seguridad se llama Personal y Gerencia se llama Escoltas. Personal muestra a todos excepto Conductor y Preparación de alimentos, ordenados por cargo y nombre. Incluye a los reservados para Escoltas y Administrativo, identificados como tales. En esta vista, los filtros Disponible y Listos para asignar muestran a los funcionarios asignados al grupo Personal.
 
 Escoltas reúne las asignaciones anteriores a Gerencia y a quienes tienen cargo Escolta con el grupo anterior Seguridad o sin grupo. Esto incluye a los escoltas del director de Seguridad. No se reescriben fichas ni servicios históricos: la compatibilidad se aplica al leer y validar. Un traslado explícito posterior al nuevo grupo Personal sigue siendo posible desde Editar ficha > Grupo de servicio y queda auditado. Los nuevos escoltas proponen Escoltas como grupo; cargo y grupo siguen siendo campos distintos. Clientes anteriores no pueden asignar estos escoltas a servicios generales mediante los nombres antiguos.
 

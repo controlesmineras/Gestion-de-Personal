@@ -138,59 +138,6 @@ body {
 
 .record-fields{display:contents}
 
-.stats{align-items:stretch}
-.stats article.availability-card{
-  --company-surface:#112c42;
-  --company-ink:#fff;
-  --company-accent:#ebad3f;
-  container-type:inline-size;
-  padding:0;
-  background:var(--company-surface);
-  color:var(--company-ink);
-  border:1px solid var(--company-surface);
-  border-top:3px solid var(--company-accent);
-}
-.stats .availability-card[data-company="E-SECURITY"]{
-  --company-surface:#fff9c9;
-  --company-ink:#273665;
-  --company-accent:#f7eb4a;
-  border-color:#c4b842;
-  border-top-color:var(--company-accent);
-}
-.availability-switch{
-  display:block;
-  position:relative;
-  width:100%;
-  height:100%;
-  padding:20px 22px 22px;
-  border:0;
-  border-radius:inherit;
-  background:transparent;
-  color:inherit;
-  font:inherit;
-  text-align:left;
-  cursor:pointer;
-}
-.availability-switch:focus-visible{outline:3px solid #276585;outline-offset:3px}
-.availability-heading{display:block;margin-right:26px;font-size:14px}
-.availability-arrows{position:absolute;top:20px;right:20px;width:18px;color:var(--company-accent)}
-.availability-card[data-company="E-SECURITY"] .availability-arrows{color:var(--company-ink)}
-.availability-value{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:17px}
-.stats .availability-value>b{margin:0;color:inherit}
-.availability-value>span{font-size:12px;font-weight:650;white-space:nowrap;color:var(--company-accent)}
-.availability-card[data-company="E-SECURITY"] .availability-value>span{color:var(--company-ink)}
-@media(max-width:480px){
-  .availability-switch{padding:15px 17px 17px}
-  .availability-heading{font-size:12px}
-  .availability-arrows{top:14px;right:14px;width:16px}
-}
-@container(max-width:205px){
-  .availability-heading>span{display:none}
-  .availability-value>span{font-size:10px}
-}
-
-
-
 .gp-table tbody tr.person-available>td{background:#edf8f0}.gp-table tbody tr.person-available:hover>td{background:#e0f2e6}
 
 .basic-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;border:1px solid #dce3e8;border-radius:12px;padding:16px;min-width:0}.basic-fields:disabled{background:#f5f7f9}.basic-fields:disabled input{color:#475569}.basic-authorization{display:grid;gap:10px}.basic-fields legend{font-weight:600}@media(max-width:600px){.basic-fields{grid-template-columns:1fr}}
@@ -222,7 +169,6 @@ body {
 @media(max-width:480px){
   .overview-actions{grid-template-columns:1fr;gap:6px;margin-top:12px}
 }
-.stats-title{margin:0 0 8px;color:#526578;font-size:.875rem;font-weight:600}
 .workspace{border-color:#b4c8d4;box-shadow:0 3px 14px #183b540d}
 .workspace-head{min-height:46px;padding:8px 20px;background:#163c52;color:#fff;border-bottom:0}
 .workspace-head h2{margin:0;font-size:1rem;font-weight:650;line-height:1.4}
@@ -239,11 +185,14 @@ body {
   .workspace-modules button{min-height:40px;padding:6px;font-size:.8125rem}
   .workspace-modules button:last-child:nth-child(odd){grid-column:1/-1}
 }
-.service-group-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 10px}.service-group-tabs button{padding:15px 10px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#243b53;font-weight:750;letter-spacing:.04em}.service-group-tabs button.active{background:#163c52;color:#fff;border-color:#163c52}.service-group-tabs button:focus-visible{outline:3px solid #38a3c6;outline-offset:2px}.group-context{color:#526578;font-size:.9rem;margin:0 0 20px}.group-assignment-note{padding:12px 14px;border-left:3px solid #487e9a;background:#eef5f8;border-radius:5px;line-height:1.5}.record-note .record-note{display:block}@media(max-width:640px){.service-group-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.service-group-tabs button{font-size:.8rem;padding:13px 5px}}
+.group-assignment-note{padding:12px 14px;border-left:3px solid #487e9a;background:#eef5f8;border-radius:5px;line-height:1.5}.record-note .record-note{display:block}
 
-/* Shared actions stay outside the group tabs. */
-.admin-common-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}.heading{flex-wrap:wrap}
-@media(max-width:600px){.admin-common-actions{width:100%;justify-content:flex-start}.admin-common-actions .primary{flex:1}}
+.management-heading{display:flex;align-items:center;gap:6px;min-width:0}
+.management-icon{display:grid;place-items:center;flex:none;width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:#fff;cursor:pointer}
+.management-icon:hover,.management-icon[aria-expanded="true"]{background:#ffffff25}
+.management-icon:focus-visible{outline:2px solid #efb52c;outline-offset:1px}
+.management-menu [role^="menuitem"]{min-height:40px}
+
 
 .absence-dates{display:grid;gap:4px;line-height:1.45}.absence-dates small{display:block;font-size:12px;color:#536b7b}
 
