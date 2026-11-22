@@ -109,3 +109,12 @@ Administrativo conserva su grupo y disponibilidad propios. Alimentos reúne coci
 ### Excepción de permisos por cargo
 
 Director de seguridad y Jefe de seguridad no llevan control de sus propios permisos: no hay registro nuevo, edición, conteo ni avisos de regreso por permiso. Los registros anteriores siguen disponibles como historial y no afectan la disponibilidad ni los alimentos. Vacaciones e incapacidades conservan sus reglas. La excepción se comprueba con el cargo del funcionario en el servidor, también al escribir, y no concede ni retira acceso de administrador. Los administradores de esos cargos pueden gestionar los permisos del resto del personal.
+
+
+## Sesión vencida y actualización de la aplicación
+
+La interfaz vuelve al ingreso cuando vence la sesión de 24 horas o el servidor la rechaza. Comprueba el vencimiento al abrir, recuperar el foco, volver del segundo plano y antes de guardar. Una sesión vencida requiere conexión y contraseña para renovarse; una sesión aún vigente conserva el acceso local sin conexión. El acceso con conexión valida primero con el servidor.
+
+Cerrar la sesión por vencimiento conserva los reportes pendientes y los borradores personales separados por documento. Al ingresar de nuevo se reintentan los pendientes cuyo plazo sigue abierto. Los alimentos vencidos permanecen en el historial local y no se presentan como enviados. El aviso distingue entre pendiente local y confirmación de sincronización.
+
+Al iniciar, ingresar, volver a la app y recuperar conexión se consulta la versión publicada sin caché. Antes de recargar se descargan sus recursos y se comprueba que no haya formularios en edición o guardados en curso. Sin conexión continúa la versión disponible. Esta corrección corresponde a la interfaz de GitHub Pages; no cambia la API ni requiere actualizar Apps Script.
