@@ -1,11 +1,35 @@
-import {useState} from 'react';
+import {useState, useSyncExternalStore} from 'react';
 import {ChevronDown} from 'lucide-react';
 import {MEAL_OPTIONS, mealLocationKey, type MealKey} from '@/lib/meals';
 import {mealBlocked, type Data} from '@/lib/personnel';
 import {MealReportTimes} from './meal-report-times';
 
+// Matches the breakpoint at which the three report columns become a single stack.
+const stackedReportsQuery = '(max-width: 800px)';
+
+function subscribeToLayout(onChange: () => void) {
+ const query = window.matchMedia(stackedReportsQuery);
+ query.addEventListener('change', onChange);
+ return () => query.removeEventListener('change', onChange);
+}
+
+const isStacked = () => window.matchMedia(stackedReportsQuery).matches;
+
 export default function AdminMealReports({data, date}: {data: Data; date: string}) {
+ const stacked = useSyncExternalStore(subscribeToLayout, isStacked, () => true);
  const [expandedMeal, setExpandedMeal] = useState<MealKey | null>(null);
+ const [collapsedColumns, setCollapsedColumns] = useState<MealKey[]>([]);
+
+ function toggleMeal(key: MealKey) {
+  if (stacked) {
+   setExpandedMeal(current => current === key ? null : key);
+  } else {
+   setCollapsedColumns(current => current.includes(key)
+    ? current.filter(column => column !== key)
+    : [...current, key]);
+  }
+ }
+
  const people = new Map(data.people.map(person => [person.id, person]));
  const reports = (data.meals ?? []).flatMap(meal => {
   if (meal.date !== date) return [];
@@ -23,11 +47,11 @@ export default function AdminMealReports({data, date}: {data: Data; date: string
  const mine=diners.filter(({meal})=>meal[locationKey]==='Mina').length;
  const unknown=diners.length-house-mine;
 
- const expanded=expandedMeal===key;
+ const expanded = stacked ? expandedMeal === key : !collapsedColumns.includes(key);
  return <article className="admin-meal-report" key={key}>
   <h3><button type="button" className="meal-report-toggle" id={'meal-toggle-'+key}
    aria-expanded={expanded} aria-controls={'meal-report-'+key}
-   onClick={()=>setExpandedMeal(current=>current===key?null:key)}>
+   onClick={()=>toggleMeal(key)}>
    <span>{label}</span>
    <span className="meal-report-count"><small>Total</small><b>{diners.length}</b></span>
    <ChevronDown size={20} aria-hidden="true"/>

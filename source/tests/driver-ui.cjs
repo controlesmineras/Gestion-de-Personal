@@ -35,8 +35,22 @@ async function checkAdminMeals(browser){
  await toggles.nth(2).press('Space');assert(await panels.nth(2).isVisible());
  assert.equal(await page.locator('.meal-report-details:visible').count(),1);
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ // Desktop columns open together. Each header controls only its own report.
+ await page.setViewportSize({width:1280,height:850});
+ await panels.nth(0).waitFor();assert.equal(await page.locator('.meal-report-details:visible').count(),3);
+ const columns=await toggles.evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().left));
+ assert(columns[0]<columns[1]&&columns[1]<columns[2]);
+ await toggles.nth(1).press('Enter');
+ assert.equal(await toggles.nth(1).getAttribute('aria-expanded'),'false');
+ assert(await panels.nth(0).isVisible());assert(await panels.nth(2).isVisible());
+ await toggles.nth(1).click();assert.equal(await page.locator('.meal-report-details:visible').count(),3);
+ await page.setViewportSize({width:390,height:844});await panels.nth(0).waitFor({state:'hidden'});
+ assert(await panels.nth(2).isVisible());assert.equal(await page.locator('.meal-report-details:visible').count(),1);
+ await page.setViewportSize({width:1280,height:850});
+ await page.getByRole('button',{name:'Volver al inicio',exact:true}).click();await shortcut.click();
+ await panels.nth(2).waitFor();assert.equal(await page.locator('.meal-report-details:visible').count(),3);
  assert.deepEqual(errors,[]);await context.close();
- console.log('PASS mobile admin meals: full-width ordered accordion, one open section, destination details and keyboard operation');
+ console.log('PASS admin meals: independent open desktop columns, mobile accordion, resizing, both entry points and keyboard operation');
 }
 async function checkMealRecovery(browser){
   const context=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844}});
