@@ -162,6 +162,32 @@ body {
 
 .meal-locations label:has(input:disabled){opacity:.55;cursor:not-allowed}
 
+.admin-meal-totals{grid-template-columns:repeat(3,minmax(0,1fr))}
+.meal-totals .admin-meal-report{min-width:0;padding:0;gap:0;border:1px solid #d7e5ed;overflow:hidden}
+.admin-meal-report h3{margin:0;font-size:16px}
+.meal-report-toggle{display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:14px 16px;text-align:left;color:#173d55;font-weight:700;cursor:pointer}
+.meal-report-toggle:focus-visible{outline:2px solid #176389;outline-offset:-3px}
+.meal-report-count{display:flex;align-items:center;gap:8px;margin-left:auto}
+.meal-report-count small{font-size:12px;font-weight:400}
+.meal-report-count b{font-size:26px;line-height:1}
+.meal-report-toggle svg{flex-shrink:0;transition:transform .15s}
+.meal-report-toggle[aria-expanded=true] svg{transform:rotate(180deg)}
+.meal-report-details{padding:16px;border-top:1px solid #d7e5ed;background:#fff;overflow-wrap:anywhere}
+.meal-report-details[hidden]{display:none}
+.meal-report-details .record-note{max-width:none}
+.meal-options-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.meal-options-row .meal-choice{min-width:0;padding:10px 6px;border:1px solid #d7e5ed;border-radius:10px;background:#f1f6f8}
+.employee-card .meal-options-row .meal-check{flex-direction:column;gap:6px;padding:2px 0 10px;font-size:14px;font-weight:650;cursor:pointer}
+.meal-options-row .meal-check input{width:20px;height:20px;min-height:20px;margin:0;padding:0;accent-color:#214f6c}
+.meal-options-row .meal-locations{margin:0}
+.meal-options-row .meal-locations legend{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.meal-options-row .meal-locations>div{display:grid;gap:6px}
+.meal-options-row .meal-locations label{min-height:42px;gap:6px;padding:6px;font-size:13px;background:#fff}
+.meal-options-row .meal-locations label:has(input:checked){background:#e5eff5}
+.employee-card .meal-options-row input[type=radio]{width:16px;height:16px;min-height:16px;padding:0;flex-shrink:0}
+@media(max-width:800px){.admin-meal-totals{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:480px){.employee-card.meal-report-card{padding:16px}}
+
 @media(max-width:560px){.kitchen-totals{grid-template-columns:1fr}}
 
 .access-card .access-logo-button{display:inline-grid;place-items:center;padding:0;border:0;background:transparent;border-radius:12px;cursor:pointer}
