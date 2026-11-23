@@ -22,14 +22,20 @@ async function checkAdminMeals(browser){
  const meals=['breakfast','lunch','dinner'];
  const people=meals.map((meal,i)=>({id:'person-'+i,name:'Funcionario de prueba '+i,document:'1000'+i,role:'Vigilante',company:'SK',status:'Disponible',serviceGroup:'Personal'}));
  await context.addInitScript(()=>{localStorage.setItem('gestion-personal-v1-access','test-admin');localStorage.setItem('gestion-personal-login-mode-v1','admin')});
- await context.route('**/api/**',route=>route.fulfill({json:{people,events:[],discipline:[],meals:meals.map((meal,i)=>({personId:people[i].id,date,[meal]:1,[meal+'Location']:i===1?'Mina':'Casa',...(i===0?{lunch:1,lunchLocation:'Casa'}:{})}))}}));
+ const reports=people.map((person,i)=>({
+  personId:person.id,date,
+  breakfast:i===0,breakfastLocation:i===0?'Casa':'',
+  lunch:i<2,lunchLocation:i===0?'Casa':i===1?'Mina':'',
+  dinner:true,dinnerLocation:'Casa',
+ }));
+ await context.route('**/api/**',route=>route.fulfill({json:{people,events:[],discipline:[],meals:reports}}));
  await page.goto(process.env.LOGIN_TEST_URL||'http://127.0.0.1:4173');
  const shortcut=page.getByRole('button',{name:'ALIMENTOS',exact:true});
  const home=page.getByRole('button',{name:'INICIO',exact:true});
  const headerCenter=await home.evaluate(el=>{const r=el.getBoundingClientRect();return r.left+r.width/2});
  assert(Math.abs(headerCenter-390/2)<=1);
  await shortcut.locator('b').first().filter({hasText:'1'}).waitFor();
- assert.deepEqual(await shortcut.locator('#overview-meals-counts > span').allTextContents(),['Desayuno 1','Almuerzo 2','Cena 1']);
+ assert.deepEqual(await shortcut.locator('#overview-meals-counts > span').allTextContents(),['Desayuno 1','Almuerzo 2','Cena 3']);
  const overviewCounts=await shortcut.locator('b').allTextContents();
  await shortcut.click();
  await page.getByRole('heading',{name:'Alimentos de mañana · '+date.split('-').reverse().join('/')}).waitFor();
