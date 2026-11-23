@@ -16,9 +16,10 @@ async function acknowledgeMeal(page) {
  await dialog.waitFor({state:'hidden'});
 }
 async function checkAdminMeals(browser){
- const context=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844}});
+ const context=await browser.newContext({serviceWorkers:'block',timezoneId:'Asia/Tokyo',viewport:{width:390,height:844}});
  const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
- const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Bogota'}).format(new Date(Date.now()+86400000));
+ await page.clock.install({time:new Date('2026-11-23T04:58:00Z')});
+ const today='2026-11-22',date='2026-11-23',past='2026-11-21';
  const meals=['breakfast','lunch','dinner'];
  const people=meals.map((meal,i)=>({id:'person-'+i,name:'Funcionario de prueba '+i,document:'1000'+i,role:'Vigilante',company:'SK',status:'Disponible',serviceGroup:'Personal'}));
  await context.addInitScript(()=>{localStorage.setItem('gestion-personal-v1-access','test-admin');localStorage.setItem('gestion-personal-login-mode-v1','admin')});
@@ -28,22 +29,46 @@ async function checkAdminMeals(browser){
   lunch:i<2,lunchLocation:i===0?'Casa':i===1?'Mina':'',
   dinner:true,dinnerLocation:'Casa',
  }));
+ reports.push({...reports[0],date:today,lunch:false,dinner:false},{...reports[2],date:past});
  await context.route('**/api/**',route=>route.fulfill({json:{people,events:[],discipline:[],meals:reports}}));
  await page.goto(process.env.LOGIN_TEST_URL||'http://127.0.0.1:4173');
  const shortcut=page.getByRole('button',{name:'ALIMENTOS',exact:true});
  const home=page.getByRole('button',{name:'INICIO',exact:true});
+ const todayButton=page.getByRole('button',{name:'HOY',exact:true});
+ const tomorrowButton=page.getByRole('button',{name:'MAÑANA',exact:true});
+ const selectedDate=page.getByLabel('Fecha de alimentos',{exact:true});
  const headerCenter=await home.evaluate(el=>{const r=el.getBoundingClientRect();return r.left+r.width/2});
  assert(Math.abs(headerCenter-390/2)<=1);
  await shortcut.locator('b').first().filter({hasText:'1'}).waitFor();
+ assert.equal(await todayButton.getAttribute('aria-pressed'),'true');
+ assert.equal(await selectedDate.inputValue(),today);
+ assert.deepEqual(await shortcut.locator('b').allTextContents(),['1','0','0']);
+ await selectedDate.fill(past);
+ assert.equal(await page.locator('.meal-date-picker span').innerText(),'21/11/2026');
+ assert.deepEqual(await shortcut.locator('b').allTextContents(),['0','0','1']);
+ await shortcut.click();
+ await page.getByRole('heading',{name:'Alimentos',exact:true}).waitFor();
+ assert.equal(await selectedDate.inputValue(),past);
+ assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),['0','0','1']);
+ await selectedDate.fill('2026-11-20');
+ assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),['0','0','0']);
+ await home.click();
+ assert.equal(await selectedDate.inputValue(),'2026-11-20');
+ await tomorrowButton.click();
  assert.deepEqual(await shortcut.locator('#overview-meals-counts > span').allTextContents(),['Desayuno 1','Almuerzo 2','Cena 3']);
  const overviewCounts=await shortcut.locator('b').allTextContents();
  await shortcut.click();
- await page.getByRole('heading',{name:'Alimentos de mañana · '+date.split('-').reverse().join('/')}).waitFor();
+ await page.getByRole('heading',{name:'Alimentos',exact:true}).waitFor();
+ assert.equal(await selectedDate.inputValue(),date);
  await page.locator('.meal-report-count b').first().filter({hasText:'1'}).waitFor();
  assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),overviewCounts);
  await page.getByRole('button',{name:/Almuerzo/}).click();
  assert.match(await page.locator('.meal-report-details:visible').innerText(),/Mina · Enviar/);
+ await todayButton.click();
+ assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),['1','0','0']);
  await home.click();await shortcut.waitFor();
+ assert.equal(await selectedDate.inputValue(),today);
+ await tomorrowButton.click();
  await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).click();
  await page.locator('.module-tabs').getByRole('button',{name:'Alimentos',exact:true}).click();
  const toggles=page.locator('.meal-report-toggle'),panels=page.locator('.meal-report-details');
@@ -76,6 +101,14 @@ async function checkAdminMeals(browser){
  await page.setViewportSize({width:1280,height:850});
  await page.getByRole('button',{name:'Volver al inicio',exact:true}).click();await shortcut.click();
  await panels.nth(2).waitFor();assert.equal(await page.locator('.meal-report-details:visible').count(),3);
+ await page.clock.fastForward(3*60*1000);
+ assert.equal(await selectedDate.inputValue(),date,'A selected date stays visible across Bogotá midnight');
+ assert.equal(await todayButton.getAttribute('aria-pressed'),'true');
+ await tomorrowButton.click();
+ assert.equal(await selectedDate.inputValue(),'2026-11-24');
+ assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),['0','0','0']);
+ await todayButton.click();
+ assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),overviewCounts);
  assert.deepEqual(errors,[]);await context.close();
  console.log('PASS admin meals: independent open desktop columns, mobile accordion, resizing, both entry points and keyboard operation');
 }

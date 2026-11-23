@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, type ReactNode} from 'react';
 import {ArrowLeftRight, ChevronRight, Users, UserPlus, Utensils} from 'lucide-react';
 import {personnelOverview} from '@/lib/dashboard';
 import {mealReportSummary} from '@/lib/meal-report-summary';
@@ -34,9 +34,10 @@ function companyValues(counts: {SK: number; 'E-SECURITY': number}): CardValue[] 
  ];
 }
 
-export default function PersonnelOverview({data, mealDate, loading, onRegister, onManage, onMeals}: {
+export default function PersonnelOverview({data, mealDate, dateSelector, loading, onRegister, onManage, onMeals}: {
  data: Data;
  mealDate: string;
+ dateSelector: ReactNode;
  loading: boolean;
  onRegister: () => void;
  onManage: () => void;
@@ -58,11 +59,11 @@ export default function PersonnelOverview({data, mealDate, loading, onRegister, 
    <div className="overview-actions">
     <button type="button" className="secondary" onClick={onRegister}><UserPlus size={18} aria-hidden="true"/>REGISTRAR FUNCIONARIO</button>
     <button type="button" id="open-personnel-management" className="primary" onClick={onManage}><Users size={18} aria-hidden="true"/>GESTIONAR PERSONAL</button>
-    <button type="button" id="open-meal-reports" className="overview-meals" onClick={onMeals}
-     aria-labelledby="overview-meals-title" aria-describedby="overview-meals-date overview-meals-counts">
+    <div className="overview-meals">
+    <button type="button" id="open-meal-reports" className="overview-meals-open" onClick={onMeals}
+     aria-labelledby="overview-meals-title" aria-describedby="overview-meals-counts">
      <span className="overview-meals-heading">
       <Utensils size={18} aria-hidden="true"/><strong id="overview-meals-title">ALIMENTOS</strong>
-      <span id="overview-meals-date">Mañana · {mealDate.split('-').reverse().join('/')}</span>
       <ChevronRight size={18} aria-hidden="true"/>
      </span>
      <span className="overview-meals-counts" id="overview-meals-counts">
@@ -71,6 +72,8 @@ export default function PersonnelOverview({data, mealDate, loading, onRegister, 
       ))}
      </span>
     </button>
+    {dateSelector}
+    </div>
    </div>
   </section>
  );
