@@ -31,7 +31,7 @@ export default function AdminMealReports({data, date}: {data: Data; date: string
   }
  }
 
- const {meals} = mealReportSummary(data, date);
+ const meals = mealReportSummary(data, date);
  return <div className="meal-totals admin-meal-totals">{meals.map(({key, label, locationKey, diners, house, mine, unknown}) => {
  const expanded = stacked ? expandedMeal === key : !collapsedColumns.includes(key);
  return <article className="admin-meal-report" key={key}>

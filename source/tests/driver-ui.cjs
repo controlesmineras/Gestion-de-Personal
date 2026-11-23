@@ -28,12 +28,13 @@ async function checkAdminMeals(browser){
  const home=page.getByRole('button',{name:'INICIO',exact:true});
  const headerCenter=await home.evaluate(el=>{const r=el.getBoundingClientRect();return r.left+r.width/2});
  assert(Math.abs(headerCenter-390/2)<=1);
- await shortcut.locator('b').first().filter({hasText:'3'}).waitFor();
- assert.deepEqual(await shortcut.locator('b').allTextContents(),['3','3','1']);
+ await shortcut.locator('b').first().filter({hasText:'1'}).waitFor();
+ assert.deepEqual(await shortcut.locator('#overview-meals-counts > span').allTextContents(),['Desayuno 1','Almuerzo 2','Cena 1']);
+ const overviewCounts=await shortcut.locator('b').allTextContents();
  await shortcut.click();
  await page.getByRole('heading',{name:'Alimentos de mañana · '+date.split('-').reverse().join('/')}).waitFor();
  await page.locator('.meal-report-count b').first().filter({hasText:'1'}).waitFor();
- assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),['1','2','1']);
+ assert.deepEqual(await page.locator('.meal-report-count b').allTextContents(),overviewCounts);
  await page.getByRole('button',{name:/Almuerzo/}).click();
  assert.match(await page.locator('.meal-report-details:visible').innerText(),/Mina · Enviar/);
  await home.click();await shortcut.waitFor();
@@ -41,7 +42,7 @@ async function checkAdminMeals(browser){
  await page.locator('.module-tabs').getByRole('button',{name:'Alimentos',exact:true}).click();
  const toggles=page.locator('.meal-report-toggle'),panels=page.locator('.meal-report-details');
  assert.equal(await toggles.count(),3);
- assert.deepEqual(await toggles.locator(':scope > span:first-child').allTextContents(),['Desayuno','Almuerzo','Comida']);
+ assert.deepEqual(await toggles.locator(':scope > span:first-child').allTextContents(),['Desayuno','Almuerzo','Cena']);
  for(const toggle of await toggles.all())assert.equal(await toggle.getAttribute('aria-expanded'),'false');
  const boxes=await toggles.evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width}}));
  assert(boxes[0].y<boxes[1].y&&boxes[1].y<boxes[2].y,'Mobile reports are stacked in meal order');

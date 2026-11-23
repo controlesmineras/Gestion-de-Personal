@@ -66,9 +66,9 @@ export default function PersonnelOverview({data, mealDate, loading, onRegister, 
       <ChevronRight size={18} aria-hidden="true"/>
      </span>
      <span className="overview-meals-counts" id="overview-meals-counts">
-      <span>Reportes <b>{loading ? '…' : meals.reports}</b></span>
-      <span>En casa <b>{loading ? '…' : meals.house}</b></span>
-      <span>En mina <b>{loading ? '…' : meals.mine}</b></span>
+      {meals.map(({key, label, diners}) => (
+       <span key={key}>{label} <b>{loading ? '…' : diners.length}</b></span>
+      ))}
      </span>
     </button>
    </div>
