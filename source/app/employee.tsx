@@ -29,6 +29,7 @@ export default function Employee({onAdmin,onAdminLogin,onSignOut,invitation='',i
  const [tab,setTab]=useState<'alimentos'|'novedades'>('alimentos');
  const [updating,setUpdating]=useState(false);
  const [continuedReport,setContinuedReport]=useState('');
+ const savingRecord=useRef(false);
  const mealDraftDate=useRef('');
  const editingMeals=useRef(false);
  const reportKey=info?.person?.id&&info?.date?info.person.id+':'+info.date:'';
@@ -212,11 +213,17 @@ export default function Employee({onAdmin,onAdminLogin,onSignOut,invitation='',i
    await load(session);
   }catch(e){if((e as any).central&&[401,403].includes((e as any).status))localSelfAccess.remove(document);setError((e as Error).message)}finally{setBusy(false)}
  }
- async function save(input:any){
+ async function save(input:any,withoutMeals=false){
+  if(savingRecord.current||busy)return;
+  const isMeal=input.action==='meals';
+  if(isMeal){
+   if(info.meal&&continuedReport!==reportKey)return;
+   if(!withoutMeals&&!MEAL_OPTIONS.some(([key])=>input[key]))return;
+  }else if(!days)return;
+  savingRecord.current=true;
   setBusy(true);setError('');setMessage('');
   try{
    requireSession(token);
-   const isMeal=input.action==='meals';
    if(info.person.role==='Conductor'&&!isMeal)throw Error('El acceso del conductor es solo para sus alimentos.');
    if(['permission','specialPermission'].includes(input.action)&&!tracksPermissions(info.person))throw Error(PERMISSION_EXEMPT_MESSAGE);
    if(isMeal&&(input.date!==addDays(bogotaDate(),1)||MEAL_OPTIONS.some(([key])=>
@@ -229,17 +236,17 @@ export default function Employee({onAdmin,onAdminLogin,onSignOut,invitation='',i
    const operationId=crypto.randomUUID();
    ops.push({id:operationId,input,createdAt:new Date().toISOString()});
    localStorage.setItem(queueKey(document),JSON.stringify(ops));
-   if(draftKey){
+   if(draftKey)try{
     const draft=JSON.parse(localStorage.getItem(draftKey)||'null');
     if(draft){
      if(isMeal)draft.meals=null;
      else{draft.start='';draft.end='';draft.reason='';draft.authorizedBy='';}
      localStorage.setItem(draftKey,JSON.stringify(draft));
     }
-   }
+   }catch{ /* The report is already queued on this device. */ }
    if(isMeal){
     editingMeals.current=false;
-    setContinuedReport(reportKey);
+    setContinuedReport('');
    }else{
     setMessage('Pendiente de envío: la novedad está guardada en este dispositivo y todavía no está confirmada.');
     setStart('');setEnd('');setReason('');setAuthorizedBy('');
@@ -251,7 +258,7 @@ export default function Employee({onAdmin,onAdminLogin,onSignOut,invitation='',i
     if(confirmed&&!isMeal&&localStorage.getItem(KEY)===token)setMessage('Reporte sincronizado.');
    }
   }catch(e){setError((e as Error).message);}
-  finally{setBusy(false);}
+  finally{savingRecord.current=false;setBusy(false);}
  }
  const reports=info?.person?.document?queued(info.person.document):[];
  const pendingReports=reports.filter(report=>!report.closedForDate);
@@ -282,7 +289,7 @@ export default function Employee({onAdmin,onAdminLogin,onSignOut,invitation='',i
    </label>)}</div>
   </fieldset>
  </div>;
-})}</div><button className="primary" disabled={busy}>{busy?'Guardando…':info.meal?'Actualizar reporte':'Guardar alimentos'}</button></form>}</section>:<><section className="employee-card"><h2><CalendarDays/>Programar / registrar novedad</h2>{!tracksPermissions(info.person)&&<p>{PERMISSION_EXEMPT_MESSAGE}</p>}<form onSubmit={e=>{e.preventDefault();void save({action:reportKind==='Vacaciones'?'vacation':reportKind==='Incapacidad'?'incapacity':reportKind==='Permiso especial'?'specialPermission':'permission',record:{id:crypto.randomUUID(),start:start+'T00:00:00-05:00',end:addDays(end,1)+'T00:00:00-05:00',place:reportKind==='Permiso especial'||reportKind==='Incapacidad'?reason:reportKind,authorizedBy:reportKind==='Permiso'||reportKind==='Permiso especial'?authorizedBy:'',notes:''}})}}><fieldset className="meal-locations">
+})}</div>{!MEAL_OPTIONS.some(([key])=>meals[key])&&<button type="button" className="secondary" disabled={busy} onClick={()=>{if(window.confirm('¿Confirmas que no requieres alimentos para esta fecha?'))void save({action:'meals',date:info.date,...mealSelections()},true)}}>Reportar sin alimentos</button>}<button className="primary" disabled={busy||!MEAL_OPTIONS.some(([key])=>meals[key])}>{busy?'Guardando…':info.meal?'Actualizar reporte':'Guardar alimentos'}</button></form>}</section>:<><section className="employee-card"><h2><CalendarDays/>Programar / registrar novedad</h2>{!tracksPermissions(info.person)&&<p>{PERMISSION_EXEMPT_MESSAGE}</p>}<form onSubmit={e=>{e.preventDefault();void save({action:reportKind==='Vacaciones'?'vacation':reportKind==='Incapacidad'?'incapacity':reportKind==='Permiso especial'?'specialPermission':'permission',record:{id:crypto.randomUUID(),start:start+'T00:00:00-05:00',end:addDays(end,1)+'T00:00:00-05:00',place:reportKind==='Permiso especial'||reportKind==='Incapacidad'?reason:reportKind,authorizedBy:reportKind==='Permiso'||reportKind==='Permiso especial'?authorizedBy:'',notes:''}})}}><fieldset className="meal-locations">
  <legend>Tipo de reporte</legend>
  <div>{(['Permiso','Permiso especial','Vacaciones','Incapacidad'] as const).map(kind=><label key={kind}>
   <input type="radio" name="reportKind" value={kind} checked={reportKind===kind}

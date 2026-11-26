@@ -1,5 +1,5 @@
-const CACHE='gestion-personal-shell-login-selector-index-BOzwMc0w.js';
-const CORE=['./','./index.html',"./assets/index-BOzwMc0w.js","./assets/index-E1AoGOwy.css",'./favicon.svg','./manifest.webmanifest','./install-app.js'];
+const CACHE='gestion-personal-shell-login-selector-index-CNs6vz2y.js';
+const CORE=['./','./index.html',"./assets/index-CNs6vz2y.js","./assets/index-E1AoGOwy.css",'./favicon.svg','./manifest.webmanifest','./install-app.js'];
 self.addEventListener('install',event=>event.waitUntil(
   caches.open(CACHE).then(cache=>cache.addAll(CORE.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())
 ));
