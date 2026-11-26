@@ -43,6 +43,19 @@ function groupLabel(group: ServiceGroup) {
 function Choice({value,options,onChange,label,labels}:{value:string;options:string[];onChange:(v:string)=>void;label:string;labels?:Record<string,string>}){return <Select value={value} onValueChange={onChange}><SelectTrigger aria-label={label}><SelectValue placeholder="Seleccionar…"/></SelectTrigger><SelectContent>{options.map(v=><SelectItem key={v} value={v}>{labels?.[v]||v}</SelectItem>)}</SelectContent></Select>}
 const localDate=(iso?:string)=>iso?new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso)).replace(' ','T'):'';
 function ItemList({label,value,onChange}:{label:string;value:string[];onChange:(v:string[])=>void}){const items=value.length?value:[''];return <fieldset className="wide item-list"><legend>{label}</legend>{items.map((v,i)=><div key={i}><input aria-label={label+' '+(i+1)} value={v} maxLength={150} placeholder={label==='Títulos'?'Ej. Bachiller':'Ej. Trabajo en equipo'} onChange={e=>onChange(items.map((x,n)=>n===i?e.target.value:x))}/><button type="button" className="icon-button" aria-label={'Quitar '+label.toLowerCase()+' '+(i+1)} onClick={()=>onChange(items.filter((_,n)=>n!==i))}>×</button></div>)}<button type="button" className="secondary" onClick={()=>onChange([...items,''])} disabled={items.length>=50}><Plus size={16}/>{label==='Títulos'?'AGREGAR OTRO TÍTULO':'AGREGAR OTRA FORTALEZA'}</button></fieldset>}
+const SELF_SESSION='gestion-personal-self-session';
+const SWITCH_PAIR='gestion-personal-switch-pair';
+
+function sessionPair(personal:string,admin:string){
+ if(sessionExpired(personal)||sessionExpired(admin)||!personal.includes('.')||!admin.includes('.'))return '';
+ // Only the public claims identify these two issued sessions. Their bearer signatures stay in the session store.
+ return JSON.stringify([personal.split('.')[0],admin.split('.')[0]]);
+}
+function pairedPersonalSession(){
+ const personal=localStorage.getItem(SELF_SESSION)||'';
+ const pair=sessionPair(personal,localStorage.getItem(KEY+'-access')||'');
+ return pair&&sessionStorage.getItem(SWITCH_PAIR)===pair?personal:'';
+}
 export default function Home(){
  const [screen, setScreen] = useState<'overview' | 'management' | 'meals'>('overview');
  const [selectedMealDate, setSelectedMealDate] = useState<string | null>(null);
@@ -53,6 +66,7 @@ export default function Home(){
 
  const[activityDraft,setActivityDraft]=useState<Activity|null>(null);
  const[laboralSession,setLaboralSession]=useState('');
+ const switchFromPersonal=useRef('');
  const[access,setAccess]=useState(false),[loginMode,setLoginMode]=useState<LoginMode>('seguridad'),[loginReady,setLoginReady]=useState(false),[accessInput,setAccessInput]=useState(''),[data,setData]=useState<Data>(EMPTY),[tab,setTab]=useState('personal'),[query,setQuery]=useState(''),[status,setStatus]=useState('Todos'),[month,setMonth]=useState(currentMonth()),[personFilter,setPersonFilter]=useState('Todos'),[loading,setLoading]=useState(true),[syncing,setSyncing]=useState(false),[pending,setPending]=useState(0),[error,setError]=useState(''),[lastSync,setLastSync]=useState(''),[dialog,setDialog]=useState<string|null>(null),[detail,setDetail]=useState<Person|null>(null),[draft,setDraft]=useState<any>({}),[saving,setSaving]=useState(false),[issued,setIssued]=useState<any>(null),[,tick]=useState(0);
  const existingPerson=data.people.find(p=>p.id===draft.id);
  useEffect(()=>{if(dialog!=='person'){setApprovalToken('');setApproverPassword('')}},[dialog]);
@@ -85,6 +99,19 @@ export default function Home(){
  const queue=useRef<Draft[]>([]),busy=useRef(false);
  const[accessPerson,setAccessPerson]=useState<Person|null>(null),[adminUsername,setAdminUsername]=useState('admin'),[activationToken,setActivationToken]=useState(''),[setupToken,setSetupToken]=useState(''),[confirmPassword,setConfirmPassword]=useState(''),[authBusy,setAuthBusy]=useState(false);
  async function centralAdminLogin(username:string,password:string){const r=await fetch(API.replace('/data','/admin-auth'),{method:'POST',signal:AbortSignal.timeout(15000),headers:{'Content-Type':'application/json'},body:JSON.stringify({action:setupToken?'setup':'login',username,password,setupToken})}),j:any=await r.json();if(!r.ok)throw Object.assign(Error(j.error||'No se pudo validar el acceso.'),{central:true,status:r.status});return j;}
+ function openFromPersonal(personal:string,personalIsAdmin:boolean){
+  if(personal!==localStorage.getItem(SELF_SESSION)||sessionExpired(personal))return;
+  setScreen('overview');
+  const alreadyPaired=pairedPersonalSession()===personal;
+  if(alreadyPaired||personalIsAdmin){
+   if(!alreadyPaired)localStorage.setItem(KEY+'-access',personal);
+   setAccess(true);chooseLoginMode('admin');void sync();return;
+  }
+  switchFromPersonal.current=personal;
+  sessionStorage.removeItem(SWITCH_PAIR);
+  localStorage.removeItem(KEY+'-access');
+  setAccess(false);setAdminUsername('admin');chooseLoginMode('admin');
+ }
  async function enterAdmin(e:React.FormEvent){
   e.preventDefault();setError('');
   if(setupToken&&accessInput!==confirmPassword){setError('Las contraseñas no coinciden.');return;}
@@ -97,6 +124,13 @@ export default function Home(){
     j=setupToken?null:await localAdminAccess.verify(username,password);
     if(!j)throw Error('El primer acceso de esta cuenta requiere conexión, o la contraseña no coincide.');
     requireSession(j.token);
+   }
+   const personal=switchFromPersonal.current;
+   if(personal){
+    if(personal!==localStorage.getItem(SELF_SESSION)||sessionExpired(personal))throw Error('La sesión personal cambió. Vuelve a Seguridad para continuar.');
+    const pair=sessionPair(personal,j.token);
+    if(pair)sessionStorage.setItem(SWITCH_PAIR,pair);
+    switchFromPersonal.current='';
    }
    localStorage.setItem(KEY+'-access',j.token);takeSessionNotice(KEY+'-access');
    setAccessInput('');setConfirmPassword('');setSetupToken('');setAccess(true);setLoading(false);
@@ -182,10 +216,12 @@ export default function Home(){
  }, [today, access, adminMode]);
  const stateClass=(s:string)=>s==='Disponible'?'available':s==='En servicio'?'service':s==='De permiso'||s==='De vacaciones'||s==='Incapacitado'||s==='Permiso extraordinario por calamidad'?'permission':'rest';
  if(!loginReady)return <div className="access-page"><p role="status">Preparando ingreso…</p></div>;
- if(!adminMode)return <Employee initialSession={laboralSession} invitation={activationToken} onAdminLogin={session=>{localStorage.setItem(KEY+'-access',session);setActivationToken('');setAccess(true);chooseLoginMode('admin');void sync()}} onAdmin={()=>chooseLoginMode('admin')} onSignOut={()=>{localStorage.removeItem(KEY+'-access');setAccess(false);setLaboralSession('');}}/>;
- if(!access)return <div className="access-page"><div className="access-card"><img src="./favicon.svg?v=20261006-personal" alt="Logo Gestión de Personal" width={64} height={64}/><h1>GESTIÓN DE PERSONAL</h1><p>{setupToken?'Crea tu contraseña de administrador.':'Acceso de administración.'}</p><button type="button" className="secondary" disabled={authBusy} onClick={()=>chooseLoginMode('seguridad')}>Volver a Seguridad</button><form onSubmit={enterAdmin}><label>Usuario<input required value={setupToken?'admin':adminUsername} readOnly={!!setupToken} onChange={e=>setAdminUsername(e.target.value)} autoComplete="username" placeholder="admin o número de documento"/></label><label>{setupToken?'Elige tu contraseña':'Contraseña'}<input type="password" required minLength={setupToken?8:undefined} maxLength={128} autoComplete={setupToken?'new-password':'current-password'} value={accessInput} onChange={e=>setAccessInput(e.target.value)}/></label>{setupToken&&<label>Confirmar contraseña<input type="password" required minLength={8} maxLength={128} autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label>}<button className="primary" disabled={authBusy}>{authBusy?'Espera…':setupToken?'Crear contraseña y entrar':'Entrar'}</button></form>{error&&<p role="alert">{error}</p>}</div></div>;
+ if(!adminMode)return <Employee initialSession={laboralSession} invitation={activationToken} onOpenAdmin={openFromPersonal} onAdmin={()=>chooseLoginMode('admin')} onSignOut={()=>{sessionStorage.removeItem(SWITCH_PAIR);switchFromPersonal.current='';localStorage.removeItem(KEY+'-access');setAccess(false);setLaboralSession('');}}/>;
+ if(!access)return <div className="access-page"><div className="access-card"><img src="./favicon.svg?v=20261006-personal" alt="Logo Gestión de Personal" width={64} height={64}/><h1>GESTIÓN DE PERSONAL</h1><p>{setupToken?'Crea tu contraseña de administrador.':'Acceso de administración.'}</p><button type="button" className="secondary" disabled={authBusy} onClick={()=>{switchFromPersonal.current='';chooseLoginMode('seguridad')}}>Volver a Seguridad</button><form onSubmit={enterAdmin}><label>Usuario<input required value={setupToken?'admin':adminUsername} readOnly={!!setupToken||!!switchFromPersonal.current} onChange={e=>setAdminUsername(e.target.value)} autoComplete="username" placeholder="admin o número de documento"/></label><label>{setupToken?'Elige tu contraseña':'Contraseña'}<input type="password" required minLength={setupToken?8:undefined} maxLength={128} autoComplete={setupToken?'new-password':'current-password'} value={accessInput} onChange={e=>setAccessInput(e.target.value)}/></label>{setupToken&&<label>Confirmar contraseña<input type="password" required minLength={8} maxLength={128} autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label>}<button className="primary" disabled={authBusy}>{authBusy?'Espera…':setupToken?'Crear contraseña y entrar':'Entrar'}</button></form>{error&&<p role="alert">{error}</p>}</div></div>;
+ const adminToken=localStorage.getItem(KEY+'-access')||'';
+ const personalReturn=pairedPersonalSession()||(hasEmployeeProfile(adminToken)?adminToken:'');
  return <div className="app"><Toaster richColors position="top-center"/><header className="top admin-header"><div className="brand"><span className="brand-icon"><img src="./favicon.svg?v=20261006-personal" alt="" width={40} height={40}/></span><div><h1>GESTIÓN DE PERSONAL</h1><span>ADMINISTRACIÓN</span></div></div><button type="button" className="admin-home" aria-current={screen==='overview'?'page':undefined}
- onClick={()=>{setScreen('overview');window.scrollTo(0,0)}}>INICIO</button><div className="header-actions">{hasEmployeeProfile(localStorage.getItem(KEY+'-access')||'')&&<button className="secondary" onClick={()=>{chooseLoginMode('seguridad');setLaboralSession(localStorage.getItem(KEY+'-access')||'')}}>Ir a Seguridad</button>}<button className="sync-button" onClick={()=>void sync()} disabled={syncing}><RefreshCw size={17} className={syncing?'spin':''}/>{syncing?'Sincronizando…':'Sincronizar'}</button><button className="secondary" onClick={()=>{localStorage.removeItem(KEY+'-access');localStorage.removeItem('gestion-personal-self-session');setAccess(false);chooseLoginMode('seguridad')}}>Salir</button></div></header><main className={screen !== 'overview' ? 'management-page' : undefined}>{screen==='overview'&&<div className="heading"><span>{lastSync?'Sincronizado a las '+lastSync:'Sin sincronización confirmada'}</span></div>}{error&&<p className="notice" role="alert">{error}</p>}{pending>0&&<p className="notice">{pending} registros pendientes de sincronizar. Conserva este dispositivo.</p>}{screen==='overview' ? (
+ onClick={()=>{setScreen('overview');window.scrollTo(0,0)}}>INICIO</button><div className="header-actions">{personalReturn&&<button className="secondary" onClick={()=>{chooseLoginMode('seguridad');setLaboralSession(personalReturn)}}>Ir a Seguridad</button>}<button className="sync-button" onClick={()=>void sync()} disabled={syncing}><RefreshCw size={17} className={syncing?'spin':''}/>{syncing?'Sincronizando…':'Sincronizar'}</button><button className="secondary" onClick={()=>{sessionStorage.removeItem(SWITCH_PAIR);switchFromPersonal.current='';localStorage.removeItem(KEY+'-access');localStorage.removeItem(SELF_SESSION);setAccess(false);chooseLoginMode('seguridad')}}>Salir</button></div></header><main className={screen !== 'overview' ? 'management-page' : undefined}>{screen==='overview'&&<div className="heading"><span>{lastSync?'Sincronizado a las '+lastSync:'Sin sincronización confirmada'}</span></div>}{error&&<p className="notice" role="alert">{error}</p>}{pending>0&&<p className="notice">{pending} registros pendientes de sincronizar. Conserva este dispositivo.</p>}{screen==='overview' ? (
   <PersonnelOverview data={data} mealDate={mealDate} dateSelector={mealDateSelector} loading={loading && !data.people.length}
    onRegister={()=>openPerson()} onManage={openManagement} onMeals={()=>setScreen('meals')}/>
  ) : screen==='meals' ? (
