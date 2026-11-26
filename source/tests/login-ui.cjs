@@ -7,35 +7,77 @@ async function checkAdminShortcut(browser) {
  const person={id:'employee',document:'12345',name:'Funcionario de prueba',role:'Vigilante',company:'SK'};
  const token=Buffer.from(JSON.stringify({id:person.id,exp:Date.now()+3600000})).toString('base64')+'.test';
  const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Bogota'}).format(new Date(Date.now()+86400000));
+ const rootToken=Buffer.from(JSON.stringify({kind:'admin',username:'admin',exp:Date.now()+3600000})).toString('base64')+'.signed';
  const requests=[];
  await context.route('**/api/**',async route=>{
   const request=route.request(),path=new URL(request.url()).pathname;
   requests.push({path,method:request.method(),authorization:request.headers().authorization});
+  if(path==='/api/admin-auth'){
+   const {username,password}=request.postDataJSON();
+   return route.fulfill(username==='admin'&&password==='password-correcta'?{json:{token:rootToken,username}}:{status:401,json:{error:'Credenciales incorrectas.'}});
+  }
   const body=path==='/api/self'
    ? {person:{...person,accessRole},date,events:[],activities:[],meal:null}
    : {people:[person],events:[],discipline:[],meals:[]};
   await route.fulfill({json:body});
  });
- await context.addInitScript(session=>localStorage.setItem('gestion-personal-self-session',session),token);
+ await context.addInitScript(session=>{if(!localStorage.getItem('gestion-personal-self-session'))localStorage.setItem('gestion-personal-self-session',session)},token);
  await page.goto(URL_BASE);
  const logo=page.getByRole('button',{name:'Ir a Administración',exact:true});
- await logo.tap();
+ const homeAdmin=page.getByRole('main').getByRole('button',{name:'Entrar a Administración',exact:true});
+ await homeAdmin.tap();
  await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).waitFor();
  await page.waitForFunction(()=>localStorage.getItem('gestion-personal-v1-cache')!==null);
  assert(requests.some(r=>r.path==='/api/data'&&r.authorization==='Bearer '+token));
  assert(requests.every(r=>r.method==='GET'));
  await page.reload();
  await page.getByRole('button',{name:'Ir a Seguridad',exact:true}).click();
- await logo.waitFor();
+ await homeAdmin.waitFor();
+ await logo.tap();
+ await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Ir a Seguridad',exact:true}).click();
+ await homeAdmin.waitFor();
  accessRole='Laboral';
  await page.reload();
  await page.getByRole('heading',{name:'Alimentos de mañana',exact:true}).waitFor();
+ await homeAdmin.waitFor();
  assert.equal(await logo.count(),0);
  await page.locator('header .brand img').tap();
  await page.getByRole('heading',{name:'Alimentos de mañana',exact:true}).waitFor();
  assert.equal(await page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true}).count(),0);
+ // A separate root account proves its own credentials once, without logging the employee out.
+ const manage=page.getByRole('button',{name:'GESTIONAR PERSONAL',exact:true});
+ const back=page.getByRole('button',{name:'Ir a Seguridad',exact:true});
+ await homeAdmin.tap();
+ assert.equal(await page.getByLabel('Usuario',{exact:true}).inputValue(),'admin');
+ assert(await page.getByLabel('Usuario',{exact:true}).getAttribute('readonly')!==null);
+ await page.getByLabel('Contraseña',{exact:true}).fill('incorrecta');
+ await page.getByRole('button',{name:'Entrar',exact:true}).tap();
+ await page.getByRole('alert').filter({hasText:'Credenciales incorrectas.'}).waitFor();
+ assert.equal(await manage.count(),0);
+ await page.getByRole('button',{name:'Volver a Seguridad',exact:true}).tap();
+ await homeAdmin.tap();
+ await page.getByLabel('Contraseña',{exact:true}).fill('password-correcta');
+ await page.getByRole('button',{name:'Entrar',exact:true}).tap();
+ await manage.waitFor();
+ assert.equal(await page.evaluate(()=>localStorage.getItem('gestion-personal-self-session')),token);
+ await back.tap();
+ await page.reload();
+ await homeAdmin.tap();
+ await manage.waitFor();
+ assert.equal(requests.filter(r=>r.path==='/api/admin-auth').length,2);
+ assert(requests.some(r=>r.path==='/api/data'&&r.authorization==='Bearer '+rootToken));
+ await back.tap();
+ await homeAdmin.waitFor();
+ // A different employee session on the same device cannot reuse the previous pairing.
+ const other=Buffer.from(JSON.stringify({id:'other',exp:Date.now()+3600000})).toString('base64')+'.other';
+ await page.evaluate(session=>localStorage.setItem('gestion-personal-self-session',session),other);
+ await page.reload();
+ await homeAdmin.tap();
+ await page.getByLabel('Contraseña',{exact:true}).waitFor();
+ assert.equal(await manage.count(),0);
  await context.close();
- console.log('PASS authenticated logo: single tap, same session, return to Seguridad and labor-only view');
+ console.log('PASS personal/admin navigation: linked role, separate root sign-in, return, reload, rejected credentials and changed employee');
 }
 (async()=>{
  const browser=await chromium.launch({headless:true});
